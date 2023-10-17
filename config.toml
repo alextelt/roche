@@ -2,7 +2,7 @@
 languageCode = "en"
 defaultContentLanguage = "en"
 
-title = "Lynx"
+title = "Coucou toi"
 # copyright = "Copy, _right?_ :thinking_face:"
 
 enableEmoji = true
@@ -14,7 +14,7 @@ disableKinds = ["taxonomy", "term"]
   # image = "img/author.jpg"  # path relative to static directory
 
   links = [
-     { email = "alexis@roche.pw" },
+     { mail = "alexis@roche.pw" },
     # { link = "https://link-to-some-website.com/" },
     # { amazon = "https://www.amazon.com/hz/wishlist/ls/wishlist-id" },
     # { apple = "https://www.apple.com" },
@@ -45,13 +45,14 @@ disableKinds = ["taxonomy", "term"]
     # { stack-exchange = "https://stackexchange.com/users/userid/username" },
     # { stack-overflow = "https://stackoverflow.com/users/userid/username" },
     # { steam = "https://steamcommunity.com/profiles/userid" },
-    # { telegram = "https://t.me/username" },
+     { telegram = "https://t.me/alextelt" },
     # { tiktok = "https://tiktok.com/@username" },
     # { tumblr = "https://username.tumblr.com" },
     # { twitch = "https://twitch.tv/username" },
     # { twitter = "https://twitter.com/username" },
     # { whatsapp = "https://wa.me/phone-number" },
     # { youtube = "https://youtube.com/username" },
+    { des sous = "https://app.lyf.eu/pot/fr/69d7a89f-aefa-4737-b411-89147f940d08" },
   ]
 
 [module]
