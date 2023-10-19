@@ -52,7 +52,7 @@ disableKinds = ["taxonomy", "term"]
     # { twitter = "https://twitter.com/username" },
     # { whatsapp = "https://wa.me/phone-number" },
     # { youtube = "https://youtube.com/username" },
-     { link = { href = "https://app.lyf.eu/pot/fr/69d7a89f-aefa-4737-b411-89147f940d08", text = "Give money", <FontAwesomeIcon icon="fa-solid fa-money-check-dollar" />}},
+     { link = { href = "https://app.lyf.eu/pot/fr/69d7a89f-aefa-4737-b411-89147f940d08", text = "Give money"}},
   ]
 
 [module]
