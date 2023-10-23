@@ -16,7 +16,8 @@ disableKinds = ["taxonomy", "term"]
   links = [
     # { mail = "alexis@roche.pw" },
     # { link = "https://link-to-some-website.com/" },
-     { amazon = "https://www.amazon.fr/hz/wishlist/ls/1I4UPG0DDMZ7A?ref_=wl_share" },
+     { amazon = { href = "https://www.amazon.fr/hz/wishlist/ls/1I4UPG0DDMZ7A?ref_=wl_share" , text = "Alexis"}},
+     { amazon = { href = "https://www.amazon.fr/hz/wishlist/ls/3MLFLNXS7TU66?ref_=wl_share" , text = "Déborah"}},
     # { apple = "https://www.apple.com" },
     # { codepen = "https://codepen.io/username" },
     # { dev = "https://dev.to/username" },
