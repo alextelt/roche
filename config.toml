@@ -9,7 +9,7 @@ enableEmoji = true
 disableKinds = ["taxonomy", "term"]
 
 [author]
-  # name = "Your name here"
+   name = "Your name here"
    headline = "Un site pour me donner du cash ou m'offrir des cadeaux"
   # image = "img/author.jpg"  # path relative to static directory
 
