@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Construis ton programme</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="description" content="Compose ton programme pour 2027, brique par brique, et découvre quelle part tu en retrouves chez chaque candidat.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Plan : un chantier. Chaque sujet est une rangée de briques ; on en pose une par rangée et le mur (son programme) monte
+   dans le bandeau en bas d'écran. À la validation, chaque candidat reçoit une barre accord / opposé / non abordé.
+   Palette de roche.pw, aucune couleur de parti. */
+:root {
+  --paper: #f2f5f3; --card: #ffffff; --ink: #18211d; --muted: #55625c;
+  --cloth: #2e6b57; --cloth-soft: #dbe9e2; --stamp: #f4b81c; --line: #c9d6cf;
+  --oppose: #9b3b2f; --vide: #c9d6cf;
+  --display: "Bowlby One", "Arial Black", Impact, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --paper: #111815; --card: #19221e; --ink: #e5ece8; --muted: #9fb0a8;
+    --cloth: #6fbf9f; --cloth-soft: #22342c; --line: #2d3c35; --oppose: #e08a7c; --vide: #3a4a43; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --paper: #111815; --card: #19221e; --ink: #e5ece8; --muted: #9fb0a8;
+  --cloth: #6fbf9f; --cloth-soft: #22342c; --line: #2d3c35; --oppose: #e08a7c; --vide: #3a4a43; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 17px/1.5 var(--body); padding-bottom: 96px; }
+a { color: var(--cloth); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--stamp); outline-offset: 2px; }
+.wrap { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+.retour { display: inline-block; margin-top: 22px; font-weight: 700; font-size: .92rem; }
+header { padding: 16px 0 10px; display: grid; gap: 10px; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.8rem); line-height: .95; margin: 0; text-wrap: balance; }
+h1 span { color: var(--cloth); }
+.lede { margin: 0; max-width: 62ch; color: var(--muted); }
+.avert { margin: 6px 0 0; font-size: .9rem; color: var(--muted); max-width: 70ch; }
+
+nav.cats { position: sticky; top: 0; z-index: 5; background: var(--paper); padding: 10px 0; display: flex; gap: 6px; overflow-x: auto; border-bottom: 1px solid var(--line); }
+nav.cats a { flex: none; text-decoration: none; font-size: .85rem; font-weight: 700; padding: 5px 11px; border-radius: 99px; background: var(--cloth-soft); color: var(--ink); }
+nav.cats a.ok { background: var(--cloth); color: var(--paper); }
+
+section.cat { padding-top: 26px; scroll-margin-top: 56px; }
+section.cat > h2 { font-family: var(--display); font-weight: 400; font-size: 1.6rem; margin: 0 0 12px; }
+.sujet { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: grid; gap: 10px; }
+.sujet h3 { margin: 0; font-size: 1.08rem; }
+.briques { display: flex; flex-wrap: wrap; gap: 8px; }
+.brique {
+  font: 700 .95rem/1.3 var(--body); text-align: left; padding: 10px 14px; border-radius: 6px; cursor: pointer;
+  border: 2px solid var(--ink); background: var(--card); color: var(--ink); max-width: 100%;
+  box-shadow: 0 3px 0 var(--ink); transition: transform .1s ease, box-shadow .1s ease;
+}
+.brique:hover { transform: translateY(-1px); }
+.brique[aria-pressed="true"] { background: var(--stamp); color: #18211d; transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.brique.sans { font-weight: 400; border-style: dashed; box-shadow: none; color: var(--muted); }
+.brique.sans[aria-pressed="true"] { background: var(--cloth-soft); color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .brique { transition: none; } }
+
+.barre-bas { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--ink); color: var(--paper); }
+.barre-bas .wrap { display: flex; align-items: center; gap: 14px; padding-top: 12px; padding-bottom: 12px; }
+.mur { flex: 1; display: flex; gap: 3px; flex-wrap: wrap; align-items: center; min-width: 0; }
+.mur i { width: 18px; height: 10px; border-radius: 2px; background: color-mix(in srgb, var(--paper) 25%, transparent); }
+.mur i.pose { background: var(--stamp); }
+.compte { font-variant-numeric: tabular-nums; font-size: .9rem; white-space: nowrap; }
+.valider { font: 700 1rem var(--body); padding: 10px 16px; border-radius: 8px; border: 0; background: var(--stamp); color: #18211d; cursor: pointer; white-space: nowrap; }
+.valider:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Résultats */
+#resultats { padding-top: 26px; }
+#resultats[hidden] { display: none; }
+.verdict { background: var(--ink); color: var(--paper); border-radius: 12px; padding: clamp(18px, 3vw, 28px); display: grid; gap: 8px; }
+.verdict small { letter-spacing: .12em; text-transform: uppercase; font-size: .78rem; opacity: .8; }
+.verdict strong { font-family: var(--display); font-weight: 400; font-size: clamp(1.7rem, 5vw, 2.6rem); line-height: 1; color: var(--stamp); }
+.verdict p { margin: 0; max-width: 62ch; }
+.legende { display: flex; gap: 14px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); margin: 16px 0 6px; }
+.legende span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.legende .a::before { background: var(--cloth); } .legende .o::before { background: var(--oppose); } .legende .v::before { background: var(--vide); }
+.classement { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.classement li { display: grid; grid-template-columns: minmax(170px, 16rem) 1fr 3.5rem; gap: 10px; align-items: center; }
+.nom { font-weight: 700; font-size: .95rem; }
+.nom small { display: block; font-weight: 400; color: var(--muted); font-size: .78rem; }
+.pile { display: flex; height: 16px; border-radius: 8px; overflow: hidden; background: var(--vide); }
+.pile i { display: block; height: 100%; }
+.pile .a { background: var(--cloth); } .pile .o { background: var(--oppose); }
+.pct { font-variant-numeric: tabular-nums; text-align: right; font-weight: 700; }
+@media (max-width: 560px) { .classement li { grid-template-columns: 1fr 3rem; } .classement .pile { grid-column: 1 / -1; grid-row: 2; } }
+h3.t { font-family: var(--display); font-weight: 400; font-size: 1.35rem; margin: 30px 0 8px; }
+.detail { display: grid; gap: 10px; }
+.detail .ligne { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.detail .ligne b { display: block; }
+.detail .choix { color: var(--cloth); font-weight: 700; }
+.detail .qui { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+.detail .qui em { font-style: normal; color: var(--ink); }
+.note { color: var(--muted); font-size: .9rem; max-width: 72ch; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+.btn { font: 700 1rem var(--body); padding: 10px 16px; border-radius: 8px; border: 2px solid var(--ink); background: var(--stamp); color: #18211d; cursor: pointer; text-decoration: none; }
+.btn.sec { background: var(--card); color: var(--ink); }
+footer { color: var(--muted); font-size: .88rem; margin-top: 34px; border-top: 1px solid var(--line); padding-top: 16px; }
+footer p { margin: 0 0 6px; max-width: 80ch; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="retour" href="/">← roche.pw, la boîte à outils</a>
+  <header>
+    <h1>Construis<br><span>ton programme</span></h1>
+    <p class="lede">Pour chaque sujet, pose la brique qui te ressemble. À la fin, tu découvres quelle part de ton programme tu retrouves chez chaque candidat à la présidentielle 2027, et ce qu'ils proposent à la place.</p>
+    <p class="avert">Les noms des candidats restent cachés jusqu'à la validation, pour que tu choisisses les idées et pas les personnes. Rien n'est enregistré ni envoyé : tout reste dans ton navigateur.</p>
+  </header>
+  <nav class="cats" id="cats" aria-label="Catégories"></nav>
+  <main id="chantier"></main>
+  <section id="resultats" hidden aria-live="polite"></section>
+  <footer>
+    <p>Positions relevées le 10 novembre 2026 dans <a href="https://melenchon2027.fr/programme/livre">L'Avenir en commun</a> (LFI) et dans le <a href="https://www.ifrap.org/comparateurs/presidentielles-2027">comparateur des programmes 2027 de la Fondation iFRAP</a>, qui recense les mesures annoncées par chaque candidat. L'iFRAP est un think tank d'orientation libérale : son relevé sert ici d'index des annonces, pas d'avis.</p>
+    <p>À cette date, seuls quelques candidats ont publié un programme complet. Pour les autres, on ne compte que les mesures annoncées : un « non abordé » veut dire « pas encore dit », pas « contre ». Les données seront mises à jour au fil des publications d'ici le premier tour du 18 avril 2027.</p>
+  </footer>
+</div>
+
+<div class="barre-bas">
+  <div class="wrap">
+    <div class="mur" id="mur" aria-hidden="true"></div>
+    <span class="compte" id="compte">0 / 0</span>
+    <button class="valider" id="valider" type="button" disabled>Valider</button>
+  </div>
+</div>
+
+<script>
+const CANDIDATS = [
+  { id: "MEL", nom: "Jean-Luc Mélenchon", parti: "La France insoumise", complet: true },
+  { id: "ROU", nom: "Fabien Roussel", parti: "PCF", complet: false },
+  { id: "TON", nom: "Marine Tondelier", parti: "Les Écologistes", complet: true },
+  { id: "GLU", nom: "Raphaël Glucksmann", parti: "Place publique", complet: false },
+  { id: "ATT", nom: "Gabriel Attal", parti: "Renaissance", complet: false },
+  { id: "PHI", nom: "Édouard Philippe", parti: "Horizons", complet: false },
+  { id: "RET", nom: "Bruno Retailleau", parti: "Les Républicains", complet: false },
+  { id: "LEP", nom: "Marine Le Pen", parti: "Rassemblement national", complet: false },
+  { id: "ZEM", nom: "Éric Zemmour", parti: "Reconquête", complet: false }
+];
+
+// Chaque option liste les candidats qui la défendent. Un candidat absent d'un sujet = « non abordé ».
+const CATEGORIES = [
+  { id: "impots", nom: "Impôts et budget", sujets: [
+    { q: "Les grandes fortunes", options: [
+      { t: "Rétablir l'ISF ou créer une taxe sur les très grandes fortunes (taxe Zucman)", c: ["MEL", "ROU", "TON", "GLU"] },
+      { t: "Taxer la fortune financière au lieu de l'immobilier", c: ["LEP"] },
+      { t: "Pas de nouvel impôt sur le patrimoine", c: ["ATT", "PHI", "RET"] } ] },
+    { q: "Les héritages", options: [
+      { t: "Taxer davantage les très gros héritages", c: ["MEL", "ROU", "TON", "GLU"] },
+      { t: "Alléger les droits de succession ou garder les exonérations actuelles", c: ["ATT", "PHI", "RET", "LEP"] } ] },
+    { q: "Les impôts des entreprises", options: [
+      { t: "Baisser fortement les impôts de production", c: ["ATT", "PHI", "RET", "LEP"] },
+      { t: "Taxer davantage les grandes entreprises et les dividendes", c: ["MEL", "ROU"] } ] },
+    { q: "La dette et le déficit", options: [
+      { t: "Inscrire une règle d'or budgétaire dans la Constitution", c: ["ATT", "PHI", "RET", "LEP"] },
+      { t: "Assouplir les règles : ne plus compter certains investissements, revoir la limite des 3 %", c: ["MEL", "TON"] } ] },
+    { q: "Les fonctionnaires", options: [
+      { t: "Réduire le nombre de postes dans la fonction publique", c: ["ATT", "RET", "LEP"] },
+      { t: "Recruter et augmenter les salaires des agents publics", c: ["ROU", "TON", "GLU"] } ] }
+  ]},
+  { id: "travail", nom: "Travail et retraites", sujets: [
+    { q: "Le salaire minimum", options: [
+      { t: "Augmenter fortement le SMIC par la loi (autour de 1 600 € net ou plus)", c: ["MEL", "ROU", "TON", "GLU"] },
+      { t: "Augmenter le salaire net en baissant les cotisations ou les impôts sur le travail", c: ["ATT", "PHI", "RET", "LEP", "ZEM"] } ] },
+    { q: "Le temps de travail", options: [
+      { t: "Revenir réellement aux 35 h, 32 h pour les métiers pénibles", c: ["MEL", "TON"] },
+      { t: "Assouplir : heures sup défiscalisées, travailler plus pour gagner plus", c: ["ATT", "ZEM"] },
+      { t: "Supprimer les 35 heures", c: ["RET"] } ] },
+    { q: "L'âge de départ à la retraite", options: [
+      { t: "Revenir à 60 ans", c: ["MEL"] },
+      { t: "Revenir à 62 ans", c: ["TON", "GLU", "LEP"] },
+      { t: "Partir plus tard : 63 à 65 ans", c: ["PHI", "RET"] },
+      { t: "Supprimer l'âge légal, chacun choisit avec décote ou surcote", c: ["ATT"] } ] }
+  ]},
+  { id: "sante", nom: "Santé", sujets: [
+    { q: "Le remboursement des soins", options: [
+      { t: "Rembourser à 100 % par la Sécurité sociale", c: ["MEL", "TON"] },
+      { t: "Faire des économies sur les arrêts maladie (contrôles, jour de carence)", c: ["RET"] } ] }
+  ]},
+  { id: "immigration", nom: "Immigration", sujets: [
+    { q: "Le droit du sol", options: [
+      { t: "Le supprimer", c: ["RET", "ZEM"] },
+      { t: "Le restreindre seulement à Mayotte", c: ["PHI"] },
+      { t: "Le maintenir", c: ["TON"] } ] },
+    { q: "Les aides sociales pour les étrangers", options: [
+      { t: "Réserver certaines aides aux Français (priorité nationale)", c: ["LEP"] },
+      { t: "Les conditionner à plusieurs années de séjour régulier", c: ["RET"] },
+      { t: "Garder l'accès actuel, y compris l'aide médicale d'État", c: ["TON"] } ] },
+    { q: "L'immigration de travail", options: [
+      { t: "Des quotas fixés chaque année ou par secteur", c: ["ATT", "PHI", "RET"] },
+      { t: "Taxer les entreprises qui embauchent des travailleurs extra-européens", c: ["LEP"] },
+      { t: "Arrêter l'immigration et organiser des retours (« remigration »)", c: ["ZEM"] },
+      { t: "Ouvrir des voies légales de travail et des titres de séjour plus longs", c: ["GLU"] } ] }
+  ]},
+  { id: "securite", nom: "Sécurité et justice", sujets: [
+    { q: "La police", options: [
+      { t: "Présomption de légitime défense pour les policiers et gendarmes", c: ["LEP", "ZEM"] },
+      { t: "Interdire les LBD et démanteler certaines unités (BAC, BRAV-M)", c: ["MEL", "TON"] } ] },
+    { q: "Les peines et la prison", options: [
+      { t: "Peines planchers et plus de places de prison", c: ["PHI", "RET", "LEP", "ZEM"] },
+      { t: "Moins de prison, plus de peines alternatives et de justice restaurative", c: ["TON", "GLU"] } ] },
+    { q: "La reconnaissance faciale", options: [
+      { t: "L'autoriser pour la sécurité", c: ["RET"] },
+      { t: "L'interdire dans l'espace public", c: ["MEL", "TON"] } ] },
+    { q: "Les drogues", options: [
+      { t: "Légaliser et encadrer le cannabis", c: ["TON"] },
+      { t: "Un état d'urgence contre les trafics", c: ["PHI", "RET"] },
+      { t: "Une convention citoyenne pour en décider", c: ["GLU"] } ] }
+  ]},
+  { id: "ecologie", nom: "Écologie et énergie", sujets: [
+    { q: "Le nucléaire", options: [
+      { t: "En sortir progressivement", c: ["MEL", "TON"] },
+      { t: "Le relancer avec de nouveaux réacteurs", c: ["ATT", "PHI", "RET", "LEP", "ZEM"] },
+      { t: "Le garder, avec un plan massif pour les renouvelables", c: ["GLU"] } ] },
+    { q: "L'éolien et le solaire", options: [
+      { t: "Accélérer les énergies renouvelables", c: ["MEL", "TON", "GLU", "PHI"] },
+      { t: "Arrêter les subventions ou les nouveaux projets éoliens", c: ["RET", "LEP", "ZEM"] } ] },
+    { q: "La facture d'énergie", options: [
+      { t: "Baisser les taxes sur l'énergie (TVA à 5,5 %, taxe sur l'électricité)", c: ["ROU", "LEP", "GLU"] },
+      { t: "Créer un pôle public de l'énergie", c: ["MEL"] } ] },
+    { q: "L'agriculture", options: [
+      { t: "Garantir des prix minimum ou rémunérateurs aux agriculteurs", c: ["MEL", "TON", "GLU", "ATT", "LEP"] },
+      { t: "Alléger les normes environnementales sur l'agriculture", c: ["PHI", "RET"] } ] }
+  ]},
+  { id: "logement", nom: "Logement", sujets: [
+    { q: "Les logements sociaux", options: [
+      { t: "Imposer 30 % de logements sociaux", c: ["MEL", "TON"] },
+      { t: "Supprimer les quotas de logements sociaux (loi SRU)", c: ["RET", "LEP"] } ] },
+    { q: "La crise du logement", options: [
+      { t: "Encadrer ou bloquer les loyers", c: ["TON", "ROU"] },
+      { t: "Construire beaucoup plus en simplifiant les règles", c: ["ATT", "RET"] },
+      { t: "Construire massivement des logements publics", c: ["MEL"] } ] }
+  ]},
+  { id: "institutions", nom: "Institutions et Europe", sujets: [
+    { q: "Les institutions", options: [
+      { t: "Une nouvelle Constitution (VIe République, assemblée constituante)", c: ["MEL", "TON"] },
+      { t: "Réformer la Ve : proportionnelle, censure constructive", c: ["GLU"] },
+      { t: "Plus de référendums", c: ["ATT", "RET", "ZEM"] },
+      { t: "Inscrire la priorité nationale dans la Constitution", c: ["LEP"] },
+      { t: "Moins de lois, encadrer le droit d'amendement", c: ["PHI"] } ] },
+    { q: "L'Union européenne", options: [
+      { t: "Réduire ou conditionner la contribution française au budget européen", c: ["LEP", "MEL"] },
+      { t: "Plus d'Europe : emprunt commun, défense européenne", c: ["GLU"] },
+      { t: "Ne jamais imposer en France plus que ce qu'exige l'UE", c: ["RET", "PHI"] } ] },
+    { q: "La défense", options: [
+      { t: "Prendre ses distances avec l'OTAN", c: ["MEL", "ROU"] },
+      { t: "Construire une défense européenne", c: ["GLU", "TON"] },
+      { t: "Acheter européen pour l'armement", c: ["ATT"] },
+      { t: "Renforcer l'armée nationale : réserve, drones, munitions", c: ["PHI", "RET"] } ] }
+  ]}
+];
+
+const SUJETS = CATEGORIES.flatMap(c => c.sujets.map((s, k) => ({ ...s, cat: c.id, key: c.id + "-" + k })));
+let choix = {}; // key -> index option, ou -1 = pas d'avis
+try { choix = JSON.parse(sessionStorage.getItem("prog-choix") || "{}"); } catch (e) {}
+const sauver = () => { try { sessionStorage.setItem("prog-choix", JSON.stringify(choix)); } catch (e) {} };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const C = Object.fromEntries(CANDIDATS.map(c => [c.id, c]));
+
+function rendreChantier() {
+  document.getElementById("cats").innerHTML = CATEGORIES.map(c => '<a href="#cat-' + c.id + '" id="nav-' + c.id + '">' + esc(c.nom) + '</a>').join("");
+  document.getElementById("chantier").innerHTML = CATEGORIES.map(c =>
+    '<section class="cat" id="cat-' + c.id + '"><h2>' + esc(c.nom) + '</h2>' +
+    c.sujets.map((s, k) => {
+      const key = c.id + "-" + k;
+      return '<div class="sujet"><h3 id="h-' + key + '">' + esc(s.q) + '</h3><div class="briques" role="group" aria-labelledby="h-' + key + '">' +
+        s.options.map((o, n) => '<button type="button" class="brique" data-k="' + key + '" data-n="' + n + '" aria-pressed="' + (choix[key] === n) + '">' + esc(o.t) + '</button>').join("") +
+        '<button type="button" class="brique sans" data-k="' + key + '" data-n="-1" aria-pressed="' + (choix[key] === -1) + '">Pas d’avis</button>' +
+        '</div></div>';
+    }).join("") + '</section>').join("");
+  document.querySelectorAll(".brique").forEach(b => b.addEventListener("click", () => {
+    const k = b.dataset.k, n = Number(b.dataset.n);
+    choix[k] = choix[k] === n ? undefined : n;
+    if (choix[k] === undefined) delete choix[k];
+    document.querySelectorAll('.brique[data-k="' + k + '"]').forEach(x => x.setAttribute("aria-pressed", String(choix[k] === Number(x.dataset.n))));
+    sauver(); majBarre();
+  }));
+  majBarre();
+}
+
+function majBarre() {
+  const poses = SUJETS.filter(s => choix[s.key] !== undefined).length;
+  document.getElementById("mur").innerHTML = SUJETS.map(s => '<i class="' + (choix[s.key] !== undefined && choix[s.key] >= 0 ? "pose" : "") + '"></i>').join("");
+  document.getElementById("compte").textContent = poses + " / " + SUJETS.length;
+  const exprimes = SUJETS.filter(s => choix[s.key] >= 0).length;
+  const v = document.getElementById("valider");
+  v.disabled = exprimes < 5;
+  v.textContent = exprimes < 5 ? "Pose au moins 5 briques" : "Valider mon programme";
+  CATEGORIES.forEach(c => {
+    const fini = c.sujets.every((s, k) => choix[c.id + "-" + k] !== undefined);
+    const a = document.getElementById("nav-" + c.id); if (a) a.classList.toggle("ok", fini);
+  });
+}
+
+function resultats() {
+  const mes = SUJETS.filter(s => choix[s.key] >= 0);
+  const n = mes.length;
+  const scores = CANDIDATS.map(c => {
+    let accord = 0, oppose = 0;
+    mes.forEach(s => {
+      const pos = s.options.findIndex(o => o.c.includes(c.id));
+      if (pos === -1) return;
+      if (pos === choix[s.key]) accord++; else oppose++;
+    });
+    return { c, accord, oppose, vide: n - accord - oppose, pct: Math.round(100 * accord / n) };
+  }).sort((a, b) => b.accord - a.accord || a.oppose - b.oppose);
+  const top = scores[0];
+  const ex = scores.filter(x => x.accord === top.accord && x.oppose === top.oppose).map(x => x.c.nom);
+  const box = document.getElementById("resultats");
+  box.hidden = false;
+  box.innerHTML =
+    '<div class="verdict"><small>Ton programme ressemble le plus à celui de</small><strong>' + esc(ex.join(" / ")) + '</strong>' +
+    '<p>Tu retrouves <b>' + top.pct + ' %</b> de ton programme (' + top.accord + ' briques sur ' + n + ') chez ' + (ex.length > 1 ? 'ces candidats' : esc(top.c.nom) + ' (' + esc(top.c.parti) + ')') + '.</p></div>' +
+    '<div class="legende"><span class="a">dans son programme</span><span class="o">il ou elle propose autre chose</span><span class="v">pas encore abordé</span></div>' +
+    '<ol class="classement">' + scores.map(x =>
+      '<li><span class="nom">' + esc(x.c.nom) + '<small>' + esc(x.c.parti) + (x.c.complet ? ' · programme complet' : ' · mesures annoncées') + '</small></span>' +
+      '<span class="pile" title="' + x.accord + ' en commun, ' + x.oppose + ' différentes, ' + x.vide + ' non abordées"><i class="a" style="width:' + (100 * x.accord / n) + '%"></i><i class="o" style="width:' + (100 * x.oppose / n) + '%"></i></span>' +
+      '<span class="pct">' + x.pct + ' %</span></li>').join("") + '</ol>' +
+    '<p class="note">Le pourcentage indique la part de tes briques présentes dans le programme du candidat. Le gris compte les sujets sur lesquels il ou elle ne s’est pas encore prononcé·e : les candidats sans programme complet en ont forcément plus.</p>' +
+    '<h3 class="t">Brique par brique : qui propose quoi</h3><div class="detail">' +
+    mes.map(s => {
+      const o = s.options[choix[s.key]];
+      const autres = s.options.map((x, i) => i === choix[s.key] || !x.c.length ? "" : '<br>« ' + esc(x.t) + ' » : <em>' + x.c.map(id => esc(C[id].nom)).join(", ") + '</em>').join("");
+      const absents = CANDIDATS.filter(c => !s.options.some(x => x.c.includes(c.id))).map(c => c.nom);
+      return '<div class="ligne"><b>' + esc(s.q) + '</b><span class="choix">Ta brique : ' + esc(o.t) + '</span>' +
+        '<div class="qui">Avec toi : <em>' + (o.c.length ? o.c.map(id => esc(C[id].nom)).join(", ") : "aucun candidat") + '</em>' + autres +
+        (absents.length ? '<br>Non abordé : ' + absents.map(esc).join(", ") : '') + '</div></div>';
+    }).join("") + '</div>' +
+    '<div class="actions"><button class="btn" type="button" id="modifier">Modifier mes briques</button><button class="btn sec" type="button" id="vider">Tout recommencer</button><a class="btn sec" href="/depute/">Comparer avec leurs votes réels →</a></div>';
+  document.getElementById("modifier").addEventListener("click", () => { box.hidden = true; document.getElementById("chantier").scrollIntoView({ behavior: "smooth" }); });
+  document.getElementById("vider").addEventListener("click", () => { choix = {}; sauver(); box.hidden = true; rendreChantier(); window.scrollTo({ top: 0 }); });
+  box.scrollIntoView({ behavior: "smooth" });
+}
+
+document.getElementById("valider").addEventListener("click", resultats);
+rendreChantier();
+</script>
+</body>
+</html>
