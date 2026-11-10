@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>roche.pw · la boîte à outils</title>
+<meta name="description" content="Petits outils faits maison par Alexis : pour les repas de famille, et la suite.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Plan : un établi. Le nom du site en grand, puis une étagère de cartes, une par outil ;
+   les listes d'envies restent discrètes en pied de page. Même palette que les outils. */
+:root {
+  --paper: #f2f5f3; --card: #ffffff; --ink: #18211d; --muted: #55625c;
+  --cloth: #2e6b57; --cloth-soft: #dbe9e2; --stamp: #f4b81c; --line: #c9d6cf;
+  --display: "Bowlby One", "Arial Black", Impact, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --paper: #111815; --card: #19221e; --ink: #e5ece8; --muted: #9fb0a8;
+    --cloth: #6fbf9f; --cloth-soft: #22342c; --line: #2d3c35; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 17px/1.5 var(--body); }
+a { color: var(--cloth); text-underline-offset: 2px; }
+a:focus-visible { outline: 3px solid var(--stamp); outline-offset: 3px; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+header { padding: 56px 0 28px; display: grid; gap: 12px; }
+.domaine { font-family: var(--display); font-weight: 400; font-size: clamp(3rem, 12vw, 6.5rem); line-height: .9; margin: 0; letter-spacing: -.01em; }
+.domaine span { color: var(--cloth); }
+.lede { margin: 0; max-width: 56ch; color: var(--muted); font-size: 1.12rem; }
+
+.etagere { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; padding-bottom: 40px; }
+.outil {
+  display: grid; grid-template-rows: auto 1fr auto; gap: 10px; text-decoration: none; color: var(--ink);
+  background: var(--card); border: 3px solid var(--ink); border-radius: 12px; overflow: hidden;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.outil:hover { transform: translateY(-3px); box-shadow: 0 6px 0 var(--ink); }
+@media (prefers-reduced-motion: reduce) { .outil { transition: none; } .outil:hover { transform: none; } }
+.vichy {
+  height: 70px; border-bottom: 3px solid var(--ink);
+  background-color: var(--card);
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--cloth) 55%, transparent) 50%, transparent 50%),
+    linear-gradient(color-mix(in srgb, var(--cloth) 55%, transparent) 50%, transparent 50%);
+  background-size: 24px 24px;
+  display: grid; place-items: center;
+}
+.vichy b { font-family: var(--display); font-weight: 400; background: var(--stamp); color: #18211d; padding: 2px 12px; border: 2px solid #18211d; border-radius: 6px; letter-spacing: .1em; }
+.outil h2 { margin: 0; padding: 0 18px; font-family: var(--display); font-weight: 400; font-size: 1.5rem; line-height: 1.05; }
+.outil p { margin: 0; padding: 0 18px; color: var(--muted); }
+.outil .go { padding: 0 18px 18px; font-weight: 700; color: var(--cloth); }
+
+.a-venir { border: 3px dashed var(--line); border-radius: 12px; padding: 18px; display: grid; align-content: center; gap: 6px; color: var(--muted); }
+.a-venir b { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: var(--ink); }
+.a-venir p { margin: 0; }
+
+footer { border-top: 1px solid var(--line); padding: 22px 0 36px; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; color: var(--muted); font-size: .95rem; }
+footer strong { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 class="domaine">roche<span>.pw</span></h1>
+    <p class="lede">La boîte à outils d'Alexis : des petits outils faits maison, gratuits et sourcés, pour la vie de tous les jours.</p>
+  </header>
+
+  <main class="etagere" aria-label="Les outils">
+    <a class="outil" href="/bingo/">
+      <div class="vichy" aria-hidden="true"><b>BINGO</b></div>
+      <h2>Le bingo du tonton</h2>
+      <p>Neuf phrases qu'on entend au repas de famille, et de quoi y répondre calmement, chiffres et sources à l'appui.</p>
+      <span class="go">Ouvrir le bingo →</span>
+    </a>
+    <div class="a-venir">
+      <b>D'autres outils arrivent</b>
+      <p>Cette étagère se remplira au fil des projets.</p>
+    </div>
+  </main>
+
+  <footer>
+    <strong>Listes d'envies</strong>
+    <a href="https://www.amazon.fr/hz/wishlist/ls/1I4UPG0DDMZ7A?ref_=wl_share">Alexis</a>
+    <a href="https://www.amazon.fr/hz/wishlist/ls/3MLFLNXS7TU66?ref_=wl_share">Déborah</a>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le bingo du tonton</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Plan : une grille de bingo posée sur une nappe vichy verte ; la case cochée reçoit un coup de tampon jaune.
+   À gauche le carton, à droite la fiche de la case choisie ; tout s'empile sur téléphone. */
+:root {
+  --paper: #f2f5f3;
+  --card: #ffffff;
+  --ink: #18211d;
+  --muted: #55625c;
+  --cloth: #2e6b57;
+  --cloth-soft: #dbe9e2;
+  --stamp: #f4b81c;
+  --line: #c9d6cf;
+  --true: #8a5a00;
+  --true-bg: #fdf3d8;
+  --display: "Bowlby One", "Arial Black", Impact, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #111815; --card: #19221e; --ink: #e5ece8; --muted: #9fb0a8;
+    --cloth: #6fbf9f; --cloth-soft: #22342c; --stamp: #f4b81c; --line: #2d3c35;
+    --true: #f4c95d; --true-bg: #2c2615; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #111815; --card: #19221e; --ink: #e5ece8; --muted: #9fb0a8;
+  --cloth: #6fbf9f; --cloth-soft: #22342c; --stamp: #f4b81c; --line: #2d3c35;
+  --true: #f4c95d; --true-bg: #2c2615; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.5; }
+a { color: var(--cloth); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--stamp); outline-offset: 2px; }
+
+.nappe {
+  height: 28px;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--cloth) 55%, transparent) 50%, transparent 50%),
+    linear-gradient(color-mix(in srgb, var(--cloth) 55%, transparent) 50%, transparent 50%);
+  background-size: 28px 28px;
+}
+header { max-width: 1180px; margin: 0 auto; padding: 28px 20px 8px; display: grid; gap: 10px; }
+.retour { font-size: .92rem; font-weight: 700; justify-self: start; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2.4rem, 7vw, 4.4rem); line-height: .95; margin: 0; letter-spacing: .01em; text-wrap: balance; }
+h1 span { color: var(--cloth); }
+.lede { max-width: 62ch; margin: 0; color: var(--muted); font-size: 1.08rem; }
+
+main { max-width: 1180px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: minmax(300px, 440px) 1fr; gap: 28px; align-items: start; }
+@media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+
+/* Carton */
+.carton { background: var(--card); border: 3px solid var(--ink); border-radius: 10px; padding: 14px; position: sticky; top: 14px; display: grid; gap: 12px; }
+@media (max-width: 860px) { .carton { position: static; } }
+.carton-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.carton-top b { font-family: var(--display); font-weight: 400; font-size: 1.6rem; letter-spacing: .12em; }
+.score { font-variant-numeric: tabular-nums; color: var(--muted); font-size: .95rem; }
+.grille { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.case {
+  position: relative; min-height: 118px; padding: 26px 8px 10px; border: 2px solid var(--ink); border-radius: 6px;
+  background: var(--card); color: var(--ink); font: 700 .93rem/1.25 var(--body); text-align: left; cursor: pointer;
+  display: flex; align-items: flex-end; transition: transform .12s ease, background .12s ease;
+}
+.case:hover { background: var(--cloth-soft); }
+.case .num { position: absolute; top: 5px; left: 8px; font-family: var(--display); font-weight: 400; font-size: .9rem; color: var(--cloth); }
+.case[aria-current="true"] { box-shadow: inset 0 0 0 3px var(--cloth); }
+.case.coche::after {
+  content: ""; position: absolute; width: 78px; height: 78px; right: 6px; top: 8px; border-radius: 50%;
+  background: radial-gradient(circle at 45% 45%, color-mix(in srgb, var(--stamp) 75%, transparent) 0 58%, color-mix(in srgb, var(--stamp) 45%, transparent) 62% 70%, transparent 72%);
+  mix-blend-mode: multiply; pointer-events: none; animation: tampon .22s ease-out;
+}
+:root[data-theme="dark"] .case.coche::after { mix-blend-mode: screen; opacity: .55; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .case.coche::after { mix-blend-mode: screen; opacity: .55; } }
+@keyframes tampon { from { transform: scale(1.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .case.coche::after { animation: none; } .case { transition: none; } }
+.bingo { display: none; background: var(--ink); color: var(--paper); border-radius: 6px; padding: 10px 12px; font-weight: 700; }
+.bingo.on { display: block; }
+.bingo b { font-family: var(--display); font-weight: 400; letter-spacing: .08em; color: var(--stamp); margin-right: 6px; }
+.carton-bas { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: .88rem; color: var(--muted); }
+.lien-btn { background: none; border: 0; padding: 0; color: var(--cloth); font: inherit; text-decoration: underline; cursor: pointer; }
+
+/* Fiche */
+.fiche { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: clamp(18px, 3vw, 30px); display: grid; gap: 22px; }
+.fiche-tete { display: grid; gap: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { font-size: .8rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; background: var(--cloth-soft); color: var(--ink); }
+.chip.num { background: var(--ink); color: var(--paper); font-family: var(--display); font-weight: 400; letter-spacing: .05em; }
+.phrase { font-family: var(--display); font-weight: 400; font-size: clamp(1.6rem, 3.6vw, 2.5rem); line-height: 1.05; margin: 0; text-wrap: balance; }
+.phrase::before { content: "« "; color: var(--cloth); } .phrase::after { content: " »"; color: var(--cloth); }
+.cocher { justify-self: start; border: 2px solid var(--ink); background: var(--stamp); color: #18211d; font: 700 .95rem var(--body); padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+.cocher[aria-pressed="true"] { background: var(--card); color: var(--ink); }
+.bloc { display: grid; gap: 8px; max-width: 68ch; }
+.bloc h3 { margin: 0; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.court { font-size: 1.2rem; font-weight: 700; margin: 0; }
+.question { margin: 0; padding: 12px 14px; border-left: 4px solid var(--cloth); background: var(--cloth-soft); border-radius: 0 6px 6px 0; font-style: italic; }
+.chiffres { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.chiffres li { display: grid; grid-template-columns: 7.5rem 1fr; gap: 12px; align-items: baseline; padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
+.chiffres li:last-child { border-bottom: 0; padding-bottom: 0; }
+.chiffres .val { font-family: var(--display); font-weight: 400; font-size: 1.25rem; line-height: 1.1; color: var(--cloth); font-variant-numeric: tabular-nums; }
+.chiffres .src { display: block; font-size: .82rem; color: var(--muted); }
+@media (max-width: 480px) { .chiffres li { grid-template-columns: 1fr; gap: 2px; } }
+.vrai { margin: 0; padding: 12px 14px; background: var(--true-bg); border-radius: 6px; }
+.vrai strong { color: var(--true); }
+.votes { margin: 0; }
+.sources { margin: 0; padding-left: 1.1rem; font-size: .92rem; display: grid; gap: 4px; }
+
+/* Règles */
+.regles { max-width: 1180px; margin: 0 auto; padding: 8px 20px 20px; display: grid; gap: 14px; }
+.regles h2 { font-family: var(--display); font-weight: 400; font-size: 1.7rem; margin: 0; }
+.regles ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; counter-reset: r; }
+@media (max-width: 860px) { .regles ol { grid-template-columns: 1fr; } }
+.regles li { counter-increment: r; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 6px; }
+.regles li::before { content: counter(r); font-family: var(--display); font-size: 1.6rem; line-height: 1; color: var(--cloth); }
+.regles li b { font-size: 1.05rem; }
+.regles li p { margin: 0; color: var(--muted); font-size: .95rem; }
+footer { max-width: 1180px; margin: 0 auto; padding: 0 20px 28px; color: var(--muted); font-size: .88rem; }
+footer p { max-width: 80ch; margin: 0 0 6px; }
+</style>
+</head>
+<body>
+<div class="nappe" aria-hidden="true"></div>
+<header>
+  <a class="retour" href="/">← roche.pw, la boîte à outils</a>
+  <h1>Le bingo<br><span>du tonton</span></h1>
+  <p class="lede">Neuf phrases qu'on entend au repas de famille, et de quoi y répondre calmement : une réponse courte, une question à lui poser, les vrais chiffres et ce qui est juste dans ce qu'il dit. À réviser avant, à cocher pendant.</p>
+</header>
+
+<main>
+  <section class="carton" aria-label="Carton de bingo">
+    <div class="carton-top"><b>BINGO</b><span class="score" id="score">0 / 9 entendues</span></div>
+    <div class="grille" id="grille"></div>
+    <div class="bingo" id="bingo" role="status"><b>BINGO !</b>Une ligne complète. Respire, ressers-toi du fromage.</div>
+    <div class="carton-bas"><span>Clique une case pour voir sa fiche.</span><button class="lien-btn" id="reset" type="button">Vider le carton</button></div>
+  </section>
+  <article class="fiche" id="fiche" aria-live="polite"></article>
+</main>
+
+<section class="regles" aria-labelledby="regles-titre">
+  <h2 id="regles-titre">Les trois règles du repas</h2>
+  <ol>
+    <li><b>Une seule case à la fois.</b><p>Il enchaîne dix affirmations en une minute, en démonter une seule prend dix minutes. Choisis celle qui compte et laisse filer le reste.</p></li>
+    <li><b>Une question avant un chiffre.</b><p>Des conversations sincères, sans jugement, où chacun parle de son vécu, ont fait évoluer durablement environ 1 personne sur 10 dans les études de Kalla et Broockman. Une leçon devant toute la famille, presque personne.</p></li>
+    <li><b>Le chiffre quand il le demande.</b><p>Les statistiques seules désarment rarement une croyance, rappelle l'Observatoire des inégalités. Garde-les pour le moment où il dit « ah bon ? » ou « prouve-le ».</p></li>
+  </ol>
+  <p style="margin:0;font-size:.9rem"><a href="https://www.sciencedaily.com/releases/2016/04/160407150305.htm">L'étude sur le « deep canvassing » (Science, 2016)</a> · <a href="https://www.inegalites.fr/Oui-mais-moi-j-en-connais-un-qui-Les-moyennes-les-distributions-et-les">Observatoire des inégalités, extrait du Petit guide de survie aux discussions de repas de famille</a></p>
+</section>
+
+<footer>
+  <p>Prototype. Chiffres vérifiés le 10 novembre 2026 auprès des sources citées dans chaque fiche. Chaque fiche dit aussi ce qui est vrai dans la phrase du tonton : un argument honnête tient mieux à table qu'un argument parfait.</p>
+  <p>Votes des députés et des groupes : <a href="https://datan.fr/">Datan</a>. Votes des sénateurs : <a href="https://www.senat.fr/">senat.fr</a>, rubrique scrutins publics.</p>
+</footer>
+
+<script>
+const FICHES = [
+  {
+    id: "envahis", phrase: "On est envahis.", sophisme: "Exagération",
+    court: "11 % des habitants sont nés à l'étranger, et un tiers d'entre eux sont devenus français. C'est plus qu'avant, mais on est loin d'une invasion.",
+    question: "Concrètement, tu le vois où ? Dans ta rue, à ton boulot ? Ça ressemble à quoi, une invasion, pour toi ?",
+    chiffres: [
+      ["11,3 %", "d'immigrés en 2024, soit 7,7 millions de personnes nées étrangères à l'étranger.", "Insee Première n° 2076, octobre 2025"],
+      ["2,6 M", "de ces immigrés ont acquis la nationalité française.", "Insee Première n° 2076"],
+      ["8,8 %", "d'étrangers en France, moins que la moyenne de l'Union européenne (9,6 %).", "Insee Première n° 2076"],
+      ["7,4 %", "d'immigrés en 1975 déjà. En 1911, ils étaient 1,1 million : l'immigration en France est ancienne.", "Insee, France portrait social 2025"]
+    ],
+    vrai: "Le nombre d'immigrés augmente plus vite que la population : +2,5 % par an en moyenne entre 2014 et 2024, contre +0,3 % pour l'ensemble des habitants. Le reconnaître évite de passer pour quelqu'un qui nie l'évidence.",
+    votes: null,
+    sources: [
+      ["Insee : 6,0 millions d'étrangers vivent en France en 2024", "https://www.insee.fr/fr/statistiques/8651304"],
+      ["Insee : Immigrés et descendants d'immigrés, France portrait social 2025", "https://www.insee.fr/fr/statistiques/8612512"]
+    ]
+  },
+  {
+    id: "allocs", phrase: "Ils viennent pour les allocs.", sophisme: "Généralisation hâtive",
+    court: "Les études de l'OCDE et du Conseil d'analyse économique trouvent que l'immigration pèse très peu sur les finances publiques, dans un sens comme dans l'autre.",
+    question: "Toi, il faudrait quoi pour que tu quittes ta famille et ton pays ? Une allocation, vraiment ?",
+    chiffres: [
+      ["−1 à +1 %", "du PIB : la contribution nette des immigrés aux finances publiques dans la plupart des 25 pays étudiés, entre 2006 et 2018.", "OCDE, Perspectives des migrations internationales 2021"],
+      ["+1,02 %", "du PIB en France en comptant ce que chacun paie et reçoit. −0,85 % si on leur attribue en plus une part des dépenses communes (armée, routes…).", "OCDE 2021, repris par La finance pour tous"],
+      ["± 0,5 %", "du PIB selon la synthèse du CAE, surtout parce que les immigrés sont plus souvent en âge de travailler.", "CAE Focus n° 072, 2021"]
+    ],
+    vrai: "Individuellement, un immigré est plus souvent au chômage et rapporte moins qu'un natif. Mais selon l'OCDE, c'est surtout parce qu'il cotise moins, pas parce qu'il touche plus d'aides. La vraie piste, c'est donc l'accès à l'emploi.",
+    votes: null,
+    sources: [
+      ["OCDE : Impact budgétaire de l'immigration dans les pays de l'OCDE (2021)", "https://www.oecd.org/fr/publications/2021/10/international-migration-outlook-2021_ea4f9277/full-report/component-8.html"],
+      ["La finance pour tous : l'immigration n'est pas un fardeau pour les finances publiques", "https://www.lafinancepourtous.com/2021/11/17/limmigration-nest-pas-un-fardeau-pour-les-finances-publiques/"],
+      ["CAE : Immigration et finances publiques (Lionel Ragot, 2021)", "https://cae-eco.fr/static/pdf/cae-focus072.pdf"]
+    ]
+  },
+  {
+    id: "boulot", phrase: "Ils nous piquent notre boulot.", sophisme: "Le gâteau de taille fixe",
+    court: "En moyenne, l'immigration ne fait pas baisser les salaires des Français. Les immigrés consomment aussi, et ça crée de l'emploi.",
+    question: "Tu connais quelqu'un qui a perdu sa place à cause d'un immigré ? Comment ça s'est passé, exactement ?",
+    chiffres: [
+      ["0", "effet mesuré sur les salaires des natifs de même diplôme et de même expérience, en France.", "CEPII, Edo et Toubal, 2014"],
+      ["1990-2010", "pas d'effet négatif sur le salaire moyen des natifs à long terme. Le salaire des moins diplômés a même plutôt progressé.", "Thèse d'Anthony Edo, École d'économie de Paris"]
+    ],
+    vrai: "Quand l'arrivée est brutale et massive, comme celle des rapatriés d'Algérie en 1962, les salaires ou l'emploi des travailleurs les plus proches ont baissé les premières années. Et l'emploi des natifs peut reculer quand des immigrés acceptent de moins bonnes conditions. C'est un argument pour faire respecter le droit du travail pour tout le monde.",
+    votes: null,
+    sources: [
+      ["CEPII : L'immigration en France, quelles réactions des salaires et de l'emploi ?", "https://ideas.repec.org/a/cii/cepill/2014-347.html"],
+      ["École d'économie de Paris : Immigration, wages and employment, evidence from France", "https://www.parisschoolofeconomics.eu/en/publications-hal/immigration-salaires-et-emplois-quels-effets-en-france"],
+      ["Slate / The Conversation : l'effet de l'immigration sur l'emploi et les salaires", "https://www.slate.fr/story/174795/economie-immigration-effet-salaires-emploi-qualification"]
+    ]
+  },
+  {
+    id: "pas-raciste", phrase: "Je ne suis pas raciste, mais…", sophisme: "Précaution oratoire",
+    court: "À CV identique, un nom à consonance maghrébine reçoit nettement moins de réponses. Le racisme ordinaire, c'est aussi ça, sans que personne se pense raciste.",
+    question: "Mais quoi ? Vas-y, finis ta phrase, je t'écoute.",
+    chiffres: [
+      ["−31,5 %", "de chances d'être rappelé pour un candidat au nom maghrébin, à CV de qualité comparable.", "Testing Dares / IPP / ISM Corum, 2019-2021"],
+      ["22,8 %", "de rappels contre 33,3 % pour un nom à consonance française, sur 2 400 offres d'emploi.", "Dares Analyses n° 67, 2021"],
+      ["× 1,5", "c'est combien de CV en plus il faut envoyer pour obtenir autant de réponses.", "Note IPP n° 76, 2021"]
+    ],
+    vrai: "Ton tonton n'est sans doute pas un méchant, et il ne se pense pas raciste. Parler de ce qu'il dit plutôt que de ce qu'il est lui évite de se braquer.",
+    votes: null,
+    sources: [
+      ["Insee : les discriminations subies par les personnes d'origine maghrébine", "https://www.insee.fr/fr/statistiques/6793310"],
+      ["Observatoire des inégalités : nettement discriminées à l'embauche", "https://inegalites.fr/Les-personnes-d-origine-maghrebine-nettement-discriminees-a-l-embauche"],
+      ["Note IPP n° 76 (texte intégral)", "https://shs.hal.science/halshs-03471261"]
+    ]
+  },
+  {
+    id: "rien-dire", phrase: "On ne peut plus rien dire.", sophisme: "Victimisation",
+    court: "Il vient de le dire devant toute la famille, et personne ne l'en a empêché. Ce qui a changé, c'est qu'on lui répond.",
+    question: "Qu'est-ce que tu voudrais dire et que tu ne peux pas ? On en parle, là, maintenant.",
+    chiffres: [
+      ["8 850", "victimes de crimes et délits à caractère raciste enregistrées par la police et la gendarmerie en 2023.", "Ministère de l'Intérieur"],
+      ["6 400", "contraventions racistes en plus la même année. Les mots ont des conséquences pour ceux qui les reçoivent.", "Ministère de l'Intérieur"]
+    ],
+    vrai: "Certains propos sont bien punis : l'injure raciale ou la provocation à la haine. Ce n'est pas nouveau, c'est encadré depuis la loi sur la presse de 1881 et la loi Pleven de 1972. Le reste, on a le droit de le dire, et les autres ont le droit de répondre.",
+    votes: null,
+    sources: [
+      ["Ministère de l'Intérieur : les atteintes à caractère raciste, xénophobe ou antireligieux en 2023", "https://www.interieur.gouv.fr/actualites/communiques-de-presse/atteintes-a-caractere-raciste-xenophobe-ou-antireligieux-en-2023"]
+    ]
+  },
+  {
+    id: "delinquants", phrase: "Ils sont tous délinquants.", sophisme: "Corrélation n'est pas causalité",
+    court: "Les étrangers sont surreprésentés dans les statistiques de police. Mais plus d'immigration ne fait pas monter la délinquance, et à âge, sexe et situation sociale égaux, l'écart s'efface en grande partie.",
+    question: "Les jeunes qui font des bêtises dans ton coin, qu'est-ce qu'ils ont en commun ? C'est la nationalité ou la galère ?",
+    chiffres: [
+      ["17 %", "des personnes mises en cause en 2023 sont étrangères, pour environ 8 % de la population. Donc 83 % sont françaises.", "Ministère de l'Intérieur (SSMSI), via vie-publique.fr"],
+      ["55 pays", "étudiés sur trente ans : pas de corrélation entre hausse de l'immigration et hausse de la criminalité. Pas de lien de cause non plus sur 215 régions européennes.", "Marie et Pinotti, Journal of Economic Perspectives, 2024"],
+      ["≈ 0", "d'écart entre nationaux et étrangers une fois comparés à même sexe, âge, situation sociale et niveau d'études (données suisses).", "André Kuhn, criminologue, Universités de Lausanne, Neuchâtel et Genève"]
+    ],
+    vrai: "La surreprésentation existe, il ne faut pas la nier. Elle s'explique surtout par une population plus jeune, plus masculine et plus précaire, et en partie par des contrôles plus ciblés. Les chercheurs notent aussi que les politiques qui poussent vers la clandestinité augmentent le risque de délinquance.",
+    votes: null,
+    sources: [
+      ["vie-publique.fr : insécurité et délinquance, les premiers chiffres 2023", "https://www.vie-publique.fr/en-bref/292849-insecurite-et-delinquance-les-premiers-chiffres-2023"],
+      ["Erasmus School of Economics : l'étude de Marie et Pinotti (en anglais)", "https://www.eur.nl/en/ese/news/study-debunks-beliefs-about-immigration-and-crime"],
+      ["Marie et Pinotti, Immigration and Crime: An International Perspective (article)", "https://doi.org/10.1257/jep.38.1.181"],
+      ["André Kuhn : comment s'explique la surreprésentation des étrangers dans la criminalité ?", "https://infoprisons.ch/wp-content/uploads/2020/11/bulletin_7_criminalite-etrangers-vivre_ensemble2012-09-no139.pdf"]
+    ]
+  },
+  {
+    id: "ame", phrase: "L'AME, ça nous coûte une fortune.", sophisme: "Chiffre sans échelle",
+    court: "L'aide médicale d'État coûte environ 1,4 milliard d'euros par an, soit à peu près 0,5 % des dépenses de santé de la Sécu.",
+    question: "Si quelqu'un a une maladie contagieuse dans le bus que tu prends, tu préfères qu'il se soigne tôt, ou qu'il attende d'arriver aux urgences ?",
+    chiffres: [
+      ["1,39 Md€", "de dépenses réelles d'AME en 2024, soins urgents compris.", "Rapport de la commission des finances du Sénat"],
+      ["465 208", "bénéficiaires fin 2024 : des personnes sans papiers, en France depuis plus de trois mois, avec de faibles ressources.", "Sénat ; Europe 1 / AFP"],
+      ["≈ 0,5 %", "des dépenses de santé prévues par la Sécu en 2024.", "Europe 1 / AFP"]
+    ],
+    vrai: "Les dépenses ont augmenté d'environ 70 % en dix ans, à cause du nombre de bénéficiaires et du coût des soins, selon le Sénat. Débattre de son fonctionnement est légitime ; dire qu'elle ruine le pays ne l'est pas.",
+    votes: "Le RN propose depuis des années de remplacer l'AME par une aide médicale d'urgence, limitée aux soins urgents, et a déposé des amendements en ce sens au budget 2025. Le rapport de la commission des finances du Sénat demande lui aussi une réforme. Ceux qui défendent l'AME telle qu'elle est avancent un argument de santé publique : soigner tôt évite les épidémies et les urgences qui coûtent plus cher.",
+    sources: [
+      ["Sénat : des dépenses d'AME en constante augmentation (rapport budget 2026)", "https://www.senat.fr/rap/l25-139-327/l25-139-3273.html"],
+      ["Europe 1 : le gouvernement veut geler les crédits de l'AME", "https://www.europe1.fr/node/242829"],
+      ["Assemblée nationale : amendement du groupe RN pour remplacer l'AME", "https://www.assemblee-nationale.fr/dyn/17/amendements/0324C/CION-SOC/AS173.pdf"]
+    ]
+  },
+  {
+    id: "integrer", phrase: "Ils ne veulent pas s'intégrer.", sophisme: "Généralisation hâtive",
+    court: "Parmi les enfants d'immigrés, 94 % se sentent français, presque autant que les personnes sans aucun lien avec l'immigration (97 %).",
+    question: "Tu penses à qui en disant ça ? Aux parents arrivés à 30 ans, ou à leurs enfants nés ici et qui sont allés à l'école avec les tiens ?",
+    chiffres: [
+      ["94 %", "des enfants de deux parents immigrés se sentent français. 71 % des immigrés eux-mêmes.", "Enquête TeO2, Ined et Insee, 27 000 personnes, publiée en mai 2026"],
+      ["86 %", "des enfants de deux parents immigrés parlaient français avec leurs parents pendant leur enfance.", "TeO2"],
+      ["59 %", "des descendants d'immigrés en couple vivent avec une personne d'une autre origine.", "TeO2"]
+    ],
+    vrai: "TeO2 montre aussi de vraies difficultés : les immigrés et descendants originaires du Maghreb et d'Afrique subsaharienne s'en sortent moins bien à l'école, pour l'emploi, le logement et les soins. Une partie de l'écart vient des discriminations qu'ils subissent (voir la case « Je ne suis pas raciste, mais… »).",
+    votes: null,
+    sources: [
+      ["Ined : le site de l'enquête Trajectoires et Origines", "https://teo.site.ined.fr/fr"],
+      ["Dossier de presse de l'ouvrage TeO2 (mai 2026)", "https://www.thuram.org/wp-content/uploads/2026/06/Trajectoires-et-origines-2.DP_.pdf"]
+    ]
+  },
+  {
+    id: "rien-faire", phrase: "De toute façon, les politiques ne font rien.", sophisme: "Affirmation invérifiable",
+    court: "Une loi immigration a été votée le 19 décembre 2023, par 349 voix contre 186, après avoir été nettement durcie par le Sénat.",
+    question: "Qu'est-ce qu'ils devraient faire, selon toi ? Et est-ce que la Constitution le permet ?",
+    chiffres: [
+      ["349 / 186", "voix pour et contre à l'Assemblée nationale le 19 décembre 2023.", "Reporterre ; Europe 1"],
+      ["35 / 86", "articles censurés en tout ou partie par le Conseil constitutionnel le 25 janvier 2024, dont la plupart avaient été ajoutés par la droite sénatoriale.", "Public Sénat"],
+      ["32", "de ces articles censurés pour une raison de procédure : ils n'avaient pas de lien avec le texte de départ (« cavaliers législatifs »).", "Le Club des juristes"]
+    ],
+    vrai: "Les mesures censurées pour cette raison de procédure n'ont pas été jugées sur le fond. Les partis qui les défendent peuvent donc les présenter à nouveau dans un autre texte, et certains l'ont annoncé.",
+    votes: "La loi a été adoptée avec les voix de la majorité présidentielle de l'époque, de LR et du RN, tandis que la gauche votait contre. Un député RN a d'ailleurs fait remarquer que sans les voix de son groupe, le texte ne passait pas. Pour le détail député par député, voir Datan.",
+    sources: [
+      ["Reporterre : la loi Immigration en partie censurée", "https://reporterre.net/La-loi-Immigration-en-partie-censuree-par-le-Conseil-constitutionnel"],
+      ["Public Sénat : le Conseil constitutionnel censure très largement le texte", "https://www.publicsenat.fr/actualites/politique/loi-immigration-le-conseil-constitutionnel-censure-32-articles-du-projet-de-loi"],
+      ["Le Club des juristes : 32 articles censurés comme cavaliers législatifs", "https://www.leclubdesjuristes.com/en-bref/loi-immigration-le-conseil-constitutionnel-opte-pour-la-censure-dune-grande-partie-du-texte-4573/"],
+      ["Europe 1 : le décompte des voix et la réaction du RN", "https://www.europe1.fr/node/5440"],
+      ["Datan : les votes des députés", "https://datan.fr/"]
+    ]
+  }
+];
+
+const LIGNES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+const STORE = "bingo-tonton-coches";
+let coches = new Set();
+try { JSON.parse(localStorage.getItem(STORE) || "[]").forEach(id => coches.add(id)); } catch (e) {}
+let courant = FICHES[0].id;
+
+const grille = document.getElementById("grille");
+const fiche = document.getElementById("fiche");
+
+function sauver() { try { localStorage.setItem(STORE, JSON.stringify([...coches])); } catch (e) {} }
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+function rendreGrille() {
+  grille.innerHTML = "";
+  FICHES.forEach((f, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.id = "case-" + f.id;
+    b.className = "case" + (coches.has(f.id) ? " coche" : "");
+    b.setAttribute("aria-current", f.id === courant ? "true" : "false");
+    b.setAttribute("aria-label", f.phrase + (coches.has(f.id) ? " (entendue)" : ""));
+    b.innerHTML = '<span class="num">' + (i + 1) + '</span>' + esc(f.phrase);
+    b.addEventListener("click", () => { location.hash = f.id; });
+    grille.appendChild(b);
+  });
+  document.getElementById("score").textContent = coches.size + " / 9 entendue" + (coches.size > 1 ? "s" : "");
+  const bingo = LIGNES.some(l => l.every(i => coches.has(FICHES[i].id)));
+  document.getElementById("bingo").classList.toggle("on", bingo);
+}
+
+function rendreFiche() {
+  const i = FICHES.findIndex(f => f.id === courant);
+  const f = FICHES[i];
+  const on = coches.has(f.id);
+  fiche.innerHTML =
+    '<div class="fiche-tete">' +
+      '<div class="chips"><span class="chip num">Case ' + (i + 1) + '</span><span class="chip">Sophisme : ' + esc(f.sophisme) + '</span></div>' +
+      '<h2 class="phrase">' + esc(f.phrase.replace(/[.…]$/, m => m === "…" ? "…" : "")) + '</h2>' +
+      '<button class="cocher" id="cocher" type="button" aria-pressed="' + on + '">' + (on ? "Décocher la case" : "Il l'a dit ! Cocher la case") + '</button>' +
+    '</div>' +
+    '<div class="bloc"><h3>En une phrase</h3><p class="court">' + esc(f.court) + '</p></div>' +
+    '<div class="bloc"><h3>La question à lui poser</h3><p class="question">' + esc(f.question) + '</p></div>' +
+    '<div class="bloc"><h3>Les chiffres, s’il demande</h3><ul class="chiffres">' +
+      f.chiffres.map(c => '<li><span class="val">' + esc(c[0]) + '</span><span>' + esc(c[1]) + '<span class="src">' + esc(c[2]) + '</span></span></li>').join("") +
+    '</ul></div>' +
+    '<div class="bloc"><h3>Ce qui est vrai dans ce qu’il dit</h3><p class="vrai"><strong>À reconnaître : </strong>' + esc(f.vrai) + '</p></div>' +
+    (f.votes ? '<div class="bloc"><h3>Ce que votent les partis</h3><p class="votes">' + esc(f.votes) + '</p></div>' : '') +
+    '<div class="bloc"><h3>Sources</h3><ul class="sources">' +
+      f.sources.map(s => '<li><a href="' + s[1] + '">' + esc(s[0]) + '</a></li>').join("") +
+    '</ul></div>';
+  document.getElementById("cocher").addEventListener("click", () => {
+    if (coches.has(f.id)) coches.delete(f.id); else coches.add(f.id);
+    sauver(); rendreGrille(); rendreFiche();
+    document.getElementById("cocher").focus();
+  });
+}
+
+function depuisHash() {
+  const h = location.hash.slice(1);
+  if (FICHES.some(f => f.id === h)) courant = h;
+  rendreGrille(); rendreFiche();
+}
+window.addEventListener("hashchange", () => {
+  depuisHash();
+  if (window.matchMedia("(max-width: 860px)").matches) fiche.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+document.getElementById("reset").addEventListener("click", () => { coches.clear(); sauver(); rendreGrille(); rendreFiche(); });
+depuisHash();
+</script>
+</body>
+</html>
