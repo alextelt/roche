@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Député d'un jour</title>
+<meta name="description" content="Vote 11 vrais textes de l'Assemblée nationale et découvre de quel groupe politique tes votes sont le plus proches.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Plan : un pupitre de député. Une carte par texte, trois gros boutons de vote comme le boîtier de l'hémicycle,
+   puis un tableau de résultats façon scrutin public. Même palette que roche.pw ; couleurs de vote neutres, pas de couleurs de partis. */
+:root {
+  --paper: #f2f5f3; --card: #ffffff; --ink: #18211d; --muted: #55625c;
+  --cloth: #2e6b57; --cloth-soft: #dbe9e2; --stamp: #f4b81c; --line: #c9d6cf;
+  --pour: #2e6b57; --contre: #9b3b2f; --abst: #8a7a3c;
+  --display: "Bowlby One", "Arial Black", Impact, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --paper: #111815; --card: #19221e; --ink: #e5ece8; --muted: #9fb0a8;
+    --cloth: #6fbf9f; --cloth-soft: #22342c; --line: #2d3c35; --pour: #6fbf9f; --contre: #e08a7c; --abst: #d9c27a; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --paper: #111815; --card: #19221e; --ink: #e5ece8; --muted: #9fb0a8;
+  --cloth: #6fbf9f; --cloth-soft: #22342c; --line: #2d3c35; --pour: #6fbf9f; --contre: #e08a7c; --abst: #d9c27a; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 17px/1.5 var(--body); }
+a { color: var(--cloth); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--stamp); outline-offset: 2px; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 20px 40px; }
+.retour { display: inline-block; margin-top: 22px; font-weight: 700; font-size: .92rem; }
+header { padding: 16px 0 18px; display: grid; gap: 10px; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.8rem); line-height: .95; margin: 0; text-wrap: balance; }
+h1 span { color: var(--cloth); }
+.lede { margin: 0; max-width: 60ch; color: var(--muted); }
+
+.progress { display: flex; gap: 4px; margin: 6px 0 14px; }
+.progress i { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+.progress i.done { background: var(--cloth); }
+.progress i.now { background: var(--stamp); }
+
+.carte { background: var(--card); border: 3px solid var(--ink); border-radius: 12px; padding: clamp(18px, 3vw, 28px); display: grid; gap: 16px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: .85rem; color: var(--muted); }
+.chip { font-weight: 700; padding: 2px 10px; border-radius: 99px; background: var(--cloth-soft); color: var(--ink); }
+.carte h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(1.4rem, 3.4vw, 2rem); line-height: 1.1; text-wrap: balance; }
+.contexte { margin: 0; max-width: 68ch; }
+.args { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 620px) { .args { grid-template-columns: 1fr; } }
+.arg { border-radius: 8px; padding: 12px 14px; background: var(--paper); border-left: 4px solid var(--line); font-size: .95rem; }
+.arg b { display: block; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px; }
+.arg.p { border-left-color: var(--pour); } .arg.p b { color: var(--pour); }
+.arg.c { border-left-color: var(--contre); } .arg.c b { color: var(--contre); }
+
+.boitier { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.vote {
+  font: 700 1.05rem var(--body); padding: 16px 8px; border-radius: 10px; cursor: pointer;
+  border: 3px solid var(--ink); background: var(--card); color: var(--ink); transition: transform .1s ease;
+}
+.vote:hover { transform: translateY(-2px); }
+.vote:active { transform: translateY(1px); }
+.vote.pour { background: var(--pour); color: #fff; border-color: var(--pour); }
+.vote.contre { background: var(--contre); color: #fff; border-color: var(--contre); }
+.vote.abst { background: var(--card); color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .vote { transition: none; } }
+.bas { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: .9rem; }
+.lien-btn { background: none; border: 0; padding: 0; color: var(--cloth); font: inherit; text-decoration: underline; cursor: pointer; }
+
+/* Résultats */
+.verdict { background: var(--ink); color: var(--paper); border-radius: 12px; padding: clamp(18px, 3vw, 28px); display: grid; gap: 8px; }
+.verdict small { letter-spacing: .12em; text-transform: uppercase; font-size: .78rem; opacity: .8; }
+.verdict strong { font-family: var(--display); font-weight: 400; font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1; color: var(--stamp); }
+.verdict p { margin: 0; max-width: 60ch; }
+.classement { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 8px; }
+.classement li { display: grid; grid-template-columns: minmax(150px, 15rem) 1fr 3.5rem; gap: 10px; align-items: center; }
+.classement .nom { font-weight: 700; font-size: .95rem; }
+.classement .nom small { display: block; font-weight: 400; color: var(--muted); font-size: .78rem; }
+.barre { height: 14px; background: var(--line); border-radius: 7px; overflow: hidden; }
+.barre i { display: block; height: 100%; background: var(--cloth); border-radius: 7px; }
+.classement li:first-child .barre i { background: var(--stamp); }
+.pct { font-variant-numeric: tabular-nums; text-align: right; font-weight: 700; }
+@media (max-width: 520px) { .classement li { grid-template-columns: 1fr 3rem; } .classement .barre { grid-column: 1 / -1; grid-row: 2; } }
+
+h3 { font-family: var(--display); font-weight: 400; font-size: 1.35rem; margin: 30px 0 8px; }
+.tableau-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+table { border-collapse: collapse; width: 100%; font-size: .85rem; }
+th, td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: center; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; white-space: normal; min-width: 14rem; }
+thead th { font-size: .75rem; color: var(--muted); vertical-align: bottom; }
+tbody tr:last-child td { border-bottom: 0; }
+.v { display: inline-block; min-width: 1.9rem; padding: 1px 5px; border-radius: 5px; font-weight: 700; font-size: .75rem; }
+.v.P { background: var(--pour); color: #fff; } .v.C { background: var(--contre); color: #fff; }
+.v.A { background: var(--abst); color: #fff; } .v.N { color: var(--muted); }
+td.toi { background: var(--cloth-soft); }
+.note { color: var(--muted); font-size: .9rem; max-width: 70ch; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+.btn { font: 700 1rem var(--body); padding: 10px 16px; border-radius: 8px; border: 2px solid var(--ink); background: var(--stamp); color: #18211d; cursor: pointer; }
+.btn.sec { background: var(--card); color: var(--ink); }
+footer { color: var(--muted); font-size: .88rem; margin-top: 30px; border-top: 1px solid var(--line); padding-top: 16px; }
+footer p { margin: 0 0 6px; max-width: 80ch; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="retour" href="/">← roche.pw, la boîte à outils</a>
+  <header>
+    <h1>Député<br><span>d'un jour</span></h1>
+    <p class="lede">11 vrais textes votés à l'Assemblée nationale depuis 2022. Lis le contexte, vote comme si tu siégeais, et découvre de quel groupe tes votes sont le plus proches.</p>
+  </header>
+  <div id="app" aria-live="polite"></div>
+  <footer>
+    <p>Positions des groupes : position majoritaire de chaque groupe sur le scrutin public, d'après <a href="https://datan.fr/">Datan</a> (données de l'Assemblée nationale), vérifiées le 10 novembre 2026. Les arguments « pour » et « contre » résument ceux avancés pendant les débats ; ils ne sont pas une prise de position de ce site.</p>
+    <p>Ce test porte sur 11 votes choisis pour couvrir des sujets variés. Il ne résume pas tout ce qu'un groupe défend, et ce n'est pas une consigne de vote.</p>
+  </footer>
+</div>
+
+<script>
+const GROUPES = [
+  { id: "LFI", nom: "La France insoumise", detail: "LFI" },
+  { id: "SOC", nom: "Socialistes", detail: "PS et apparentés" },
+  { id: "ECO", nom: "Écologistes", detail: "Écologiste (et Social)" },
+  { id: "GDR", nom: "Gauche démocrate et républicaine", detail: "Communistes et ultramarins" },
+  { id: "LIOT", nom: "LIOT", detail: "Libertés, Indépendants, Outre-mer et Territoires" },
+  { id: "RE", nom: "Renaissance / EPR", detail: "Parti du président" },
+  { id: "DEM", nom: "MoDem", detail: "Démocrates" },
+  { id: "HOR", nom: "Horizons", detail: "Parti d'Édouard Philippe" },
+  { id: "LR", nom: "LR / Droite républicaine", detail: "Les Républicains" },
+  { id: "RN", nom: "Rassemblement national", detail: "RN" },
+  { id: "UDR", nom: "UDR", detail: "Alliés d'Éric Ciotti, depuis 2024" }
+];
+// P = pour, C = contre, A = abstention, null = groupe inexistant, absent ou sans position majoritaire
+const VOTES = [
+  {
+    titre: "Faut-il porter le SMIC à 1 500 € net par mois ?",
+    date: "20 juillet 2022", theme: "Salaires", resultat: "Rejeté",
+    contexte: "En pleine inflation, la gauche propose d'augmenter le salaire minimum, alors d'environ 1 330 € net, lors de l'examen de la loi « pouvoir d'achat ».",
+    pour: "Les prix flambent et les bas salaires ne suffisent plus. Une hausse du SMIC tire aussi vers le haut les salaires juste au-dessus.",
+    contre: "Une hausse brutale du coût du travail peut fragiliser les petites entreprises et l'emploi des moins qualifiés. Mieux vaut des primes ou des baisses de cotisations.",
+    lien: "https://datan.fr/votes/legislature-16/vote_44",
+    pos: { LFI: "P", SOC: "P", ECO: "P", GDR: "P", LIOT: "P", RE: "C", DEM: "C", HOR: "C", LR: "C", RN: "C", UDR: null }
+  },
+  {
+    titre: "Faut-il taxer les « superprofits » des grandes entreprises ?",
+    date: "23 juillet 2022", theme: "Impôts", resultat: "Rejeté",
+    contexte: "Amendement pour taxer les profits exceptionnels des producteurs de gaz et de pétrole et des transporteurs maritimes, qui ont profité de la crise.",
+    pour: "Certaines entreprises ont fait des bénéfices records grâce à la crise pendant que les ménages trinquaient. Le Royaume-Uni l'a fait.",
+    contre: "Une taxe de ce type est difficile à cibler et peut freiner l'investissement. Le gouvernement préférait une contribution coordonnée au niveau européen.",
+    lien: "https://datan.fr/votes/legislature-16/vote_103",
+    pos: { LFI: "P", SOC: "P", ECO: "P", GDR: "P", LIOT: "P", RE: "C", DEM: "C", HOR: "C", LR: "A", RN: "P", UDR: null }
+  },
+  {
+    titre: "Faut-il rétablir l'impôt de solidarité sur la fortune (ISF) ?",
+    date: "23 juillet 2022", theme: "Impôts", resultat: "Rejeté",
+    contexte: "L'ISF a été remplacé en 2018 par l'IFI, qui ne taxe plus que le patrimoine immobilier. La gauche propose de le rétablir et de le renforcer.",
+    pour: "Les plus gros patrimoines doivent contribuer davantage. Selon les auteurs, la suppression de l'ISF n'a pas eu les effets promis sur l'emploi et l'investissement.",
+    contre: "L'ISF faisait partir des contribuables et des capitaux à l'étranger. L'IFI existe déjà, et la France est l'un des pays qui taxent le plus.",
+    lien: "https://datan.fr/votes/legislature-16/vote_106",
+    pos: { LFI: "P", SOC: "P", ECO: "P", GDR: "P", LIOT: "C", RE: "C", DEM: "C", HOR: "C", LR: "C", RN: "C", UDR: null }
+  },
+  {
+    titre: "Faut-il tripler les sanctions contre le squat des logements ?",
+    date: "4 avril 2023", theme: "Logement", resultat: "Adopté",
+    contexte: "Loi « anti-squat » portée par Guillaume Kasbarian (Renaissance) : peines alourdies pour les squatteurs, procédures accélérées pour les propriétaires.",
+    pour: "Des propriétaires, parfois modestes, ne peuvent pas récupérer leur logement. L'État doit faire respecter la propriété.",
+    contre: "Les squats concernent très peu de logements. Le texte risque de pénaliser la précarité ; la Fondation Abbé Pierre et des rapporteurs de l'ONU l'ont critiqué.",
+    lien: "https://datan.fr/votes/legislature-16/vote_1361",
+    pos: { LFI: "C", SOC: "C", ECO: "C", GDR: "C", LIOT: "P", RE: "P", DEM: "P", HOR: "P", LR: "P", RN: "P", UDR: null }
+  },
+  {
+    titre: "Faut-il geler les loyers face à l'inflation ?",
+    date: "31 mai 2023", theme: "Logement", resultat: "Rejeté",
+    contexte: "La hausse des loyers est plafonnée à 3,5 % par an depuis 2022. La gauche propose d'aller plus loin et d'interdire toute hausse.",
+    pour: "Le logement pèse de plus en plus dans le budget des ménages, et l'inflation touche déjà l'alimentation et l'énergie.",
+    contre: "Les propriétaires subissent aussi l'inflation et les travaux de rénovation. Un gel risque de réduire l'offre de logements à louer.",
+    lien: "https://datan.fr/votes/legislature-16/vote_1759",
+    pos: { LFI: "P", SOC: "P", ECO: "P", GDR: "P", LIOT: null, RE: "C", DEM: "C", HOR: "C", LR: "C", RN: "C", UDR: null }
+  },
+  {
+    titre: "Faut-il conditionner le RSA à 15 heures d'activité par semaine ?",
+    date: "14 novembre 2023", theme: "Travail", resultat: "Adopté",
+    contexte: "Loi « pour le plein emploi » : création de France Travail et obligation, sauf exceptions, de 15 heures d'activité (formation, insertion…) pour les allocataires du RSA.",
+    pour: "Beaucoup d'allocataires restent au RSA pendant des années. Un accompagnement plus intensif aide à revenir vers l'emploi.",
+    contre: "Le RSA est un minimum vital. Le conditionner expose les plus précaires à des sanctions, sans moyens suffisants pour les accompagner.",
+    lien: "https://datan.fr/votes/legislature-16/vote_2965",
+    pos: { LFI: "C", SOC: "C", ECO: "C", GDR: "C", LIOT: "C", RE: "P", DEM: "P", HOR: "P", LR: "P", RN: "C", UDR: null }
+  },
+  {
+    titre: "Faut-il adopter la loi immigration de 2023 ?",
+    date: "19 décembre 2023", theme: "Immigration", resultat: "Adopté",
+    contexte: "Texte durci par le Sénat et la commission mixte paritaire : expulsions facilitées, regroupement familial et accès aux aides plus restreints. Le Conseil constitutionnel en a ensuite censuré une grande partie.",
+    pour: "Il faut mieux contrôler l'immigration et pouvoir expulser plus facilement les étrangers qui commettent des délits.",
+    contre: "Des dizaines d'associations et de syndicats l'ont qualifié de texte le plus régressif depuis 40 ans pour les droits des étrangers.",
+    lien: "https://datan.fr/votes/legislature-16/vote_3213",
+    pos: { LFI: "C", SOC: "C", ECO: "C", GDR: "C", LIOT: null, RE: "P", DEM: "P", HOR: "P", LR: "P", RN: "P", UDR: null }
+  },
+  {
+    titre: "Faut-il créer un droit à l'aide à mourir ?",
+    date: "27 mai 2025", theme: "Fin de vie", resultat: "Adopté (1re lecture)",
+    contexte: "Proposition de loi d'Olivier Falorni (MoDem) : permettre à une personne majeure, atteinte d'une maladie grave et incurable, de demander une aide à mourir, sous conditions. Vote libre dans tous les groupes.",
+    pour: "Chacun doit pouvoir choisir une fin de vie digne quand la souffrance devient insupportable. La Convention citoyenne s'est prononcée pour.",
+    contre: "Le risque de pression sur les personnes vulnérables est réel. La priorité devrait être de développer les soins palliatifs.",
+    lien: "https://datan.fr/votes/legislature-17/vote_2107",
+    pos: { LFI: "P", SOC: "P", ECO: "P", GDR: "P", LIOT: "P", RE: "P", DEM: "P", HOR: "P", LR: "C", RN: "C", UDR: "C" }
+  },
+  {
+    titre: "Faut-il supprimer les zones à faibles émissions (ZFE) ?",
+    date: "28 mai 2025", theme: "Écologie", resultat: "Adopté",
+    contexte: "Les ZFE interdisent progressivement les vieux véhicules polluants dans les grandes agglomérations. Un article propose de les supprimer.",
+    pour: "Les ZFE excluent des villes les ménages modestes qui n'ont pas les moyens de changer de voiture.",
+    contre: "La pollution de l'air cause des milliers de morts prématurées par an. Supprimer les ZFE, c'est renoncer à un outil de santé publique.",
+    lien: "https://datan.fr/votes/legislature-17/vote_2190",
+    pos: { LFI: "P", SOC: "C", ECO: "C", GDR: null, LIOT: "P", RE: "C", DEM: "A", HOR: "C", LR: "P", RN: "P", UDR: "P" }
+  },
+  {
+    titre: "Faut-il adopter la loi Duplomb sur l'agriculture ?",
+    date: "8 juillet 2025", theme: "Agriculture", resultat: "Adopté",
+    contexte: "Loi pour « lever les contraintes » des agriculteurs, dont la réintroduction sous dérogation d'un pesticide interdit, l'acétamipride. Cet article a ensuite été censuré par le Conseil constitutionnel ; une pétition contre la loi a dépassé deux millions de signatures.",
+    pour: "Les agriculteurs français subissent une concurrence déloyale de pays qui utilisent ces produits, et restent parfois sans solution face aux ravageurs.",
+    contre: "Les néonicotinoïdes nuisent aux abeilles et posent des questions de santé. La loi a été adoptée sans vrai débat dans l'hémicycle.",
+    lien: "https://datan.fr/votes/legislature-17/vote_2957",
+    pos: { LFI: "C", SOC: "C", ECO: "C", GDR: "C", LIOT: "P", RE: "P", DEM: "P", HOR: "P", LR: "P", RN: "P", UDR: "P" }
+  },
+  {
+    titre: "Faut-il suspendre la réforme des retraites jusqu'en 2028 ?",
+    date: "12 novembre 2025", theme: "Retraites", resultat: "Adopté",
+    contexte: "Pour éviter la censure, le gouvernement Lecornu propose de geler le recul de l'âge de départ à 64 ans jusqu'à après la présidentielle.",
+    pour: "La réforme de 2023 a été imposée sans vote. La suspendre est un premier pas pour revenir dessus.",
+    contre: "Deux objections opposées : ça coûte cher (environ 1,9 milliard en 2027) et ça fragilise les comptes, ou bien ce n'est qu'un report et il faut abroger la réforme.",
+    lien: "https://datan.fr/votes/legislature-17/vote_3684",
+    pos: { LFI: "C", SOC: "P", ECO: "P", GDR: "C", LIOT: "P", RE: "A", DEM: "A", HOR: "C", LR: "C", RN: "P", UDR: "C" }
+  }
+];
+
+const app = document.getElementById("app");
+let i = 0;
+let reponses = [];
+const LIB = { P: "Pour", C: "Contre", A: "Abst.", null: "—" };
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+function barre() {
+  return '<div class="progress" aria-hidden="true">' + VOTES.map((_, k) =>
+    '<i class="' + (k < i ? "done" : k === i ? "now" : "") + '"></i>').join("") + '</div>';
+}
+
+function question() {
+  const v = VOTES[i];
+  app.innerHTML = barre() +
+    '<article class="carte">' +
+      '<div class="meta"><span class="chip">Texte ' + (i + 1) + ' / ' + VOTES.length + '</span><span>' + esc(v.theme) + ' · ' + esc(v.date) + '</span></div>' +
+      '<h2 id="q-titre" tabindex="-1">' + esc(v.titre) + '</h2>' +
+      '<p class="contexte">' + esc(v.contexte) + '</p>' +
+      '<div class="args"><div class="arg p"><b>Ceux qui votent pour</b>' + esc(v.pour) + '</div><div class="arg c"><b>Ceux qui votent contre</b>' + esc(v.contre) + '</div></div>' +
+      '<div class="boitier" role="group" aria-label="Ton vote">' +
+        '<button class="vote pour" type="button" data-v="P">Pour</button>' +
+        '<button class="vote abst" type="button" data-v="A">Abstention</button>' +
+        '<button class="vote contre" type="button" data-v="C">Contre</button>' +
+      '</div>' +
+      '<div class="bas">' +
+        (i > 0 ? '<button class="lien-btn" type="button" id="prec">← Texte précédent</button>' : '<span></span>') +
+        '<button class="lien-btn" type="button" id="passer">Je ne sais pas, passer</button>' +
+      '</div>' +
+    '</article>';
+  app.querySelectorAll(".vote").forEach(b => b.addEventListener("click", () => repondre(b.dataset.v)));
+  document.getElementById("passer").addEventListener("click", () => repondre(null));
+  const p = document.getElementById("prec");
+  if (p) p.addEventListener("click", () => { i--; question(); });
+  document.getElementById("q-titre").focus({ preventScroll: true });
+}
+
+function repondre(v) {
+  reponses[i] = v;
+  i++;
+  if (i < VOTES.length) question(); else resultats();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function accord(a, b) {
+  if (a === b) return 1;
+  if (a === "A" || b === "A") return 0.5;
+  return 0;
+}
+
+function resultats() {
+  const scores = GROUPES.map(g => {
+    let s = 0, n = 0;
+    VOTES.forEach((v, k) => {
+      const u = reponses[k], p = v.pos[g.id];
+      if (u && p) { s += accord(u, p); n++; }
+    });
+    return { g, n, pct: n ? Math.round(100 * s / n) : null };
+  }).filter(x => x.n >= 3).sort((a, b) => b.pct - a.pct || b.n - a.n);
+
+  const exprimes = reponses.filter(Boolean).length;
+  if (exprimes < 3 || !scores.length) {
+    app.innerHTML = '<div class="verdict"><small>Pas assez de votes</small><strong>Tu t’es beaucoup abstenu·e</strong><p>Il faut avoir voté sur au moins 3 textes pour obtenir un résultat.</p></div><div class="actions"><button class="btn" type="button" id="re">Recommencer</button></div>';
+    document.getElementById("re").addEventListener("click", recommencer);
+    return;
+  }
+  const top = scores[0];
+  const exaequo = scores.filter(x => x.pct === top.pct).map(x => x.g.nom);
+  const nomTop = exaequo.length > 1 ? exaequo.join(" / ") : top.g.nom;
+
+  app.innerHTML =
+    '<div class="verdict"><small>Ton étiquette</small><strong>' + esc(nomTop) + '</strong>' +
+    '<p>Tu as voté comme ce groupe dans <b>' + top.pct + ' %</b> des cas, sur les ' + top.n + ' textes où vous vous êtes tous les deux exprimés.' +
+    (exaequo.length > 1 ? ' Plusieurs groupes sont à égalité.' : '') + '</p></div>' +
+    '<h3>Ta proximité avec chaque groupe</h3>' +
+    '<ol class="classement">' + scores.map(x =>
+      '<li><span class="nom">' + esc(x.g.nom) + '<small>' + esc(x.g.detail) + (x.n < VOTES.length ? ' · ' + x.n + ' textes comparés' : '') + '</small></span>' +
+      '<span class="barre"><i style="width:' + x.pct + '%"></i></span><span class="pct">' + x.pct + ' %</span></li>').join("") +
+    '</ol>' +
+    '<p class="note">Même vote = 1 point, une abstention face à un pour ou un contre = ½ point, votes opposés = 0. L’UDR n’existe que depuis 2024 : elle n’est comparée que sur les textes récents.</p>' +
+    '<h3>Le détail, texte par texte</h3>' +
+    '<div class="tableau-wrap"><table><thead><tr><th>Texte</th><th>Toi</th>' + GROUPES.map(g => '<th>' + esc(g.id) + '</th>').join("") + '</tr></thead><tbody>' +
+      VOTES.map((v, k) => '<tr><td><a href="' + v.lien + '">' + esc(v.titre) + '</a><br><small>' + esc(v.date) + ' · ' + esc(v.resultat) + '</small></td>' +
+        '<td class="toi">' + pastille(reponses[k]) + '</td>' +
+        GROUPES.map(g => '<td>' + pastille(v.pos[g.id]) + '</td>').join("") + '</tr>').join("") +
+    '</tbody></table></div>' +
+    '<div class="actions"><button class="btn" type="button" id="re">Recommencer</button><a class="btn sec" href="https://datan.fr/">Explorer les votes sur Datan</a></div>';
+  document.getElementById("re").addEventListener("click", recommencer);
+}
+
+function pastille(v) {
+  if (!v) return '<span class="v N">—</span>';
+  return '<span class="v ' + v + '">' + LIB[v] + '</span>';
+}
+function recommencer() { i = 0; reponses = []; question(); window.scrollTo({ top: 0 }); }
+
+question();
+</script>
+</body>
+</html>

@@ -51,6 +51,10 @@ header { padding: 56px 0 28px; display: grid; gap: 12px; }
   background-size: 24px 24px;
   display: grid; place-items: center;
 }
+.vichy.hemicycle {
+  background-image: repeating-radial-gradient(circle at 50% 120%, transparent 0 10px, color-mix(in srgb, var(--cloth) 55%, transparent) 10px 18px);
+  background-size: auto;
+}
 .vichy b { font-family: var(--display); font-weight: 400; background: var(--stamp); color: #18211d; padding: 2px 12px; border: 2px solid #18211d; border-radius: 6px; letter-spacing: .1em; }
 .outil h2 { margin: 0; padding: 0 18px; font-family: var(--display); font-weight: 400; font-size: 1.5rem; line-height: 1.05; }
 .outil p { margin: 0; padding: 0 18px; color: var(--muted); }
@@ -77,6 +81,12 @@ footer strong { color: var(--ink); }
       <h2>Le bingo du tonton</h2>
       <p>Neuf phrases qu'on entend au repas de famille, et de quoi y répondre calmement, chiffres et sources à l'appui.</p>
       <span class="go">Ouvrir le bingo →</span>
+    </a>
+    <a class="outil" href="/depute/">
+      <div class="vichy hemicycle" aria-hidden="true"><b>POUR · CONTRE</b></div>
+      <h2>Député d'un jour</h2>
+      <p>Vote 11 vrais textes de l'Assemblée nationale depuis 2022 et découvre de quel groupe politique tes votes sont le plus proches.</p>
+      <span class="go">Passer le test →</span>
     </a>
     <div class="a-venir">
       <b>D'autres outils arrivent</b>
