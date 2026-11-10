@@ -7,7 +7,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<meta name="description" content="Vote 10 vrais textes, tirés au hasard parmi 21, de l'Assemblée nationale et découvre de quel groupe politique tes votes sont le plus proches.">
+<meta name="description" content="Vote 10 vrais textes, tirés au hasard parmi 24, de l'Assemblée nationale et découvre de quel groupe politique tes votes sont le plus proches.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -110,12 +110,12 @@ footer p { margin: 0 0 6px; max-width: 80ch; }
   <a class="retour" href="/">← roche.pw, la boîte à outils</a>
   <header>
     <h1>Député<br><span>d'un jour</span></h1>
-    <p class="lede">10 vrais textes votés à l'Assemblée nationale depuis 2022, tirés au hasard parmi 21. Lis le contexte, vote comme si tu siégeais, et découvre de quel groupe tes votes sont le plus proches. À chaque partie, de nouveaux textes.</p>
+    <p class="lede">10 vrais textes votés à l'Assemblée nationale depuis 2022, tirés au hasard parmi 24. Lis le contexte, vote comme si tu siégeais, et découvre de quel groupe tes votes sont le plus proches. À chaque partie, de nouveaux textes.</p>
   </header>
   <div id="app" aria-live="polite"></div>
   <footer>
     <p>Positions des groupes : position majoritaire de chaque groupe sur le scrutin public, d'après <a href="https://datan.fr/">Datan</a> (données de l'Assemblée nationale), vérifiées le 10 novembre 2026. Les arguments « pour » et « contre » résument ceux avancés pendant les débats ; ils ne sont pas une prise de position de ce site.</p>
-    <p>La réserve compte 21 votes choisis pour couvrir des sujets variés ; chaque partie en tire 10. Il ne résume pas tout ce qu'un groupe défend, et ce n'est pas une consigne de vote.</p>
+    <p>La réserve compte 24 votes choisis pour couvrir des sujets variés ; chaque partie en tire 10. Il ne résume pas tout ce qu'un groupe défend, et ce n'est pas une consigne de vote.</p>
   </footer>
 </div>
 
@@ -323,6 +323,33 @@ const VOTES = [
     contre: "Il fragilise l'unité de la République et ne répond pas aux vraies difficultés de l'île (logement, coût de la vie, violence).",
     lien: "https://datan.fr/votes/legislature-17/vote_7454",
     pos: { LFI: "P", SOC: "P", ECO: "P", GDR: null, LIOT: "P", RE: "P", DEM: "P", HOR: "P", LR: "C", RN: "C", UDR: "C" }
+  },
+  {
+    titre: "Faut-il autoriser des dérogations pour l'acétamipride, un pesticide interdit ?",
+    date: "20 juillet 2026", theme: "Agriculture", resultat: "Adopté",
+    contexte: "Loi d'urgence agricole : l'Anses pourra accorder des dérogations pour deux pesticides interdits en France mais autorisés dans l'Union européenne, l'acétamipride et le flupyradifurone, pour certaines filières comme la betterave ou la noisette.",
+    pour: "Ces filières n'ont pas d'alternative face aux ravageurs et subissent la concurrence de pays européens qui utilisent ces produits. Le Conseil constitutionnel a jugé l'encadrement suffisant.",
+    contre: "Ces néonicotinoïdes nuisent aux abeilles et posent des questions de santé ; des médecins ont alerté. En 2025, une pétition contre la loi Duplomb avait réuni plus de deux millions de signatures.",
+    lien: "https://datan.fr/votes/legislature-17/vote_8427",
+    pos: { LFI: "C", SOC: "C", ECO: "C", GDR: "C", LIOT: "A", RE: "P", DEM: "P", HOR: "P", LR: "P", RN: "P", UDR: "P" }
+  },
+  {
+    titre: "Faut-il créer un congé pour les salariés victimes de violences sexuelles ?",
+    date: "13 octobre 2026", theme: "Travail", resultat: "Adopté (second vote)",
+    contexte: "Dans la loi « intégrale » contre les violences sexuelles : un congé spécifique, sans arrêt maladie, pour faire les démarches médicales et judiciaires. Rejeté le 9 octobre, il a été rétabli lors d'un second vote.",
+    pour: "Les victimes ont besoin de temps pour porter plainte et se soigner, sans puiser dans leurs congés payés ni devoir passer par un arrêt maladie.",
+    contre: "Ce type de congé devrait être négocié dans les accords d'entreprise plutôt qu'imposé par la loi à tous les employeurs.",
+    lien: "https://datan.fr/votes/legislature-17/vote_8704",
+    pos: { LFI: "P", SOC: "P", ECO: "P", GDR: "P", LIOT: "P", RE: "P", DEM: "P", HOR: "A", LR: "A", RN: "C", UDR: "C" }
+  },
+  {
+    titre: "Faut-il rendre obligatoire le Nutri-Score sur les emballages ?",
+    date: "22 octobre 2026", theme: "Santé", resultat: "Rejeté (63 contre 62)",
+    contexte: "Amendement au budget de la Sécurité sociale : affichage obligatoire du Nutri-Score sur les aliments emballés, sauf produits AOP et IGP. Les entreprises récalcitrantes paieraient une contribution à l'Assurance maladie.",
+    pour: "Plus de 12 millions de personnes ont une maladie chronique. Le Nutri-Score aide à choisir des produits plus sains et pousse les industriels à améliorer leurs recettes.",
+    contre: "L'étiquetage alimentaire relève du droit européen, qui ne permet pas de l'imposer, et la sanction financière pèserait lourdement sur les entreprises.",
+    lien: "https://datan.fr/votes/legislature-17/vote_9052",
+    pos: { LFI: "P", SOC: "P", ECO: "P", GDR: "P", LIOT: "P", RE: "P", DEM: "P", HOR: "P", LR: "C", RN: "C", UDR: "C" }
   }
 ];
 
