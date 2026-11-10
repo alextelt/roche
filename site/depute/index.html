@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Député d'un jour</title>
-<meta name="description" content="Vote 11 vrais textes de l'Assemblée nationale et découvre de quel groupe politique tes votes sont le plus proches.">
+<meta name="description" content="Vote 10 vrais textes, tirés au hasard parmi 21, de l'Assemblée nationale et découvre de quel groupe politique tes votes sont le plus proches.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -107,12 +107,12 @@ footer p { margin: 0 0 6px; max-width: 80ch; }
   <a class="retour" href="/">← roche.pw, la boîte à outils</a>
   <header>
     <h1>Député<br><span>d'un jour</span></h1>
-    <p class="lede">11 vrais textes votés à l'Assemblée nationale depuis 2022. Lis le contexte, vote comme si tu siégeais, et découvre de quel groupe tes votes sont le plus proches.</p>
+    <p class="lede">10 vrais textes votés à l'Assemblée nationale depuis 2022, tirés au hasard parmi 21. Lis le contexte, vote comme si tu siégeais, et découvre de quel groupe tes votes sont le plus proches. À chaque partie, de nouveaux textes.</p>
   </header>
   <div id="app" aria-live="polite"></div>
   <footer>
     <p>Positions des groupes : position majoritaire de chaque groupe sur le scrutin public, d'après <a href="https://datan.fr/">Datan</a> (données de l'Assemblée nationale), vérifiées le 10 novembre 2026. Les arguments « pour » et « contre » résument ceux avancés pendant les débats ; ils ne sont pas une prise de position de ce site.</p>
-    <p>Ce test porte sur 11 votes choisis pour couvrir des sujets variés. Il ne résume pas tout ce qu'un groupe défend, et ce n'est pas une consigne de vote.</p>
+    <p>La réserve compte 21 votes choisis pour couvrir des sujets variés ; chaque partie en tire 10. Il ne résume pas tout ce qu'un groupe défend, et ce n'est pas une consigne de vote.</p>
   </footer>
 </div>
 
@@ -230,26 +230,119 @@ const VOTES = [
     contre: "Deux objections opposées : ça coûte cher (environ 1,9 milliard en 2027) et ça fragilise les comptes, ou bien ce n'est qu'un report et il faut abroger la réforme.",
     lien: "https://datan.fr/votes/legislature-17/vote_3684",
     pos: { LFI: "C", SOC: "P", ECO: "P", GDR: "C", LIOT: "P", RE: "A", DEM: "A", HOR: "C", LR: "C", RN: "P", UDR: "C" }
+  },
+  {
+    titre: "Faut-il indexer les salaires sur l'inflation ?",
+    date: "20 juillet 2022", theme: "Salaires", resultat: "Rejeté",
+    contexte: "Amendement pour que les salaires du privé, sous le salaire moyen, augmentent automatiquement au rythme des prix, comme en Belgique.",
+    pour: "L'inflation est durable : sans indexation, les salariés perdent du pouvoir d'achat chaque mois. Seul le SMIC est protégé aujourd'hui.",
+    contre: "Une indexation automatique risque d'entretenir une spirale prix-salaires et de peser sur la compétitivité des entreprises.",
+    lien: "https://datan.fr/votes/legislature-16/vote_41",
+    pos: { LFI: "P", SOC: "P", ECO: "P", GDR: "P", LIOT: "P", RE: "C", DEM: "C", HOR: "C", LR: "C", RN: "C", UDR: null }
+  },
+  {
+    titre: "Faut-il moduler l'assurance chômage selon la conjoncture ?",
+    date: "4 octobre 2022", theme: "Travail", resultat: "Adopté",
+    contexte: "Article permettant au gouvernement de durcir les règles d'indemnisation du chômage quand l'emploi va bien, et de les assouplir quand il va mal.",
+    pour: "Quand des secteurs manquent de bras, il faut inciter davantage à reprendre un emploi.",
+    contre: "Cela réduit encore les droits des chômeurs après la réforme de 2019, et le gouvernement décide seul, sans les partenaires sociaux.",
+    lien: "https://datan.fr/votes/legislature-16/vote_208",
+    pos: { LFI: "C", SOC: "C", ECO: "C", GDR: "C", LIOT: "C", RE: "P", DEM: "P", HOR: "P", LR: "P", RN: "C", UDR: null }
+  },
+  {
+    titre: "Faut-il accélérer la construction de nouveaux réacteurs nucléaires ?",
+    date: "21 mars 2023", theme: "Énergie", resultat: "Adopté",
+    contexte: "Projet de loi pour simplifier les procédures et construire de nouveaux EPR. Il supprime aussi l'objectif de réduire la part du nucléaire à 50 % de l'électricité.",
+    pour: "Le nucléaire produit une électricité bas carbone et renforce la souveraineté énergétique de la France.",
+    contre: "Les chantiers d'EPR ont accumulé retards et surcoûts, les déchets restent un problème, et la relance a été décidée avant tout débat sur le mix énergétique.",
+    lien: "https://datan.fr/votes/legislature-16/vote_1243",
+    pos: { LFI: "C", SOC: "C", ECO: "C", GDR: "P", LIOT: "P", RE: "P", DEM: "P", HOR: "P", LR: "P", RN: "P", UDR: null }
+  },
+  {
+    titre: "Faut-il expérimenter la vidéosurveillance par intelligence artificielle ?",
+    date: "23 mars 2023", theme: "Sécurité", resultat: "Adopté",
+    contexte: "Pour les Jeux olympiques de Paris, un article autorise des logiciels qui analysent les images des caméras et des drones pour repérer automatiquement des situations à risque.",
+    pour: "Les grands événements sont des cibles. L'outil aide les forces de l'ordre à réagir vite, avec de nombreuses garanties prévues par la loi.",
+    contre: "Aucune étude ne prouve son efficacité, et elle fait peser un risque de surveillance de masse et de discrimination dans l'espace public.",
+    lien: "https://datan.fr/votes/legislature-16/vote_1274",
+    pos: { LFI: "C", SOC: "C", ECO: "C", GDR: "C", LIOT: null, RE: "P", DEM: "P", HOR: "P", LR: "P", RN: "P", UDR: null }
+  },
+  {
+    titre: "Faut-il approuver l'accord de sécurité avec l'Ukraine ?",
+    date: "12 mars 2024", theme: "International", resultat: "Approuvé (vote non contraignant)",
+    contexte: "Accord bilatéral entre Paris et Kiev : la France s'engage notamment à fournir jusqu'à 3 milliards d'euros d'aide militaire supplémentaire en 2024.",
+    pour: "L'Ukraine a été envahie. La soutenir, c'est aussi défendre la sécurité de l'Europe.",
+    contre: "L'accord ne trace aucune ligne rouge ni perspective de paix et risque d'entraîner la France dans une escalade.",
+    lien: "https://datan.fr/votes/legislature-16/vote_3461",
+    pos: { LFI: "C", SOC: "P", ECO: "P", GDR: "C", LIOT: "P", RE: "P", DEM: "P", HOR: "P", LR: "P", RN: "A", UDR: null }
+  },
+  {
+    titre: "Faut-il restreindre le droit du sol à Mayotte ?",
+    date: "6 février 2025", theme: "Immigration", resultat: "Adopté",
+    contexte: "Pour qu'un enfant né à Mayotte devienne français, ses deux parents (et non plus un seul) devraient y résider légalement depuis au moins trois ans.",
+    pour: "Mayotte subit une pression migratoire exceptionnelle. Il faut réduire ce qui attire l'immigration irrégulière sur l'île.",
+    contre: "Le lien entre droit du sol et immigration n'a jamais été démontré, et le texte rompt l'unité du droit de la nationalité.",
+    lien: "https://datan.fr/votes/legislature-17/vote_738",
+    pos: { LFI: "C", SOC: "C", ECO: "C", GDR: "C", LIOT: "P", RE: "P", DEM: "P", HOR: "P", LR: "P", RN: "P", UDR: "P" }
+  },
+  {
+    titre: "Faut-il adopter la loi contre le narcotrafic ?",
+    date: "29 avril 2025", theme: "Sécurité", resultat: "Adopté",
+    contexte: "Création d'un parquet national dédié à la criminalité organisée et de nouveaux moyens d'enquête et de renseignement contre les trafiquants.",
+    pour: "Le trafic de drogue gangrène des villes entières. La justice et la police ont besoin d'outils à la hauteur.",
+    contre: "Certaines mesures restreignent fortement les libertés et les droits de la défense, au-delà de ce qui est nécessaire.",
+    lien: "https://datan.fr/votes/legislature-17/vote_1473",
+    pos: { LFI: "C", SOC: "P", ECO: "A", GDR: "A", LIOT: "P", RE: "P", DEM: "P", HOR: "P", LR: "P", RN: "P", UDR: "P" }
+  },
+  {
+    titre: "Faut-il durcir la justice des mineurs ?",
+    date: "13 mai 2025", theme: "Justice", resultat: "Adopté",
+    contexte: "Loi portée par Gabriel Attal : comparution immédiate possible dès 16 ans, « excuse de minorité » plus souvent écartée, parents davantage tenus responsables.",
+    pour: "Certains faits commis par des mineurs sont d'une grande violence. La réponse pénale doit être plus rapide et plus ferme.",
+    contre: "Le texte remet en cause le principe selon lequel un mineur doit d'abord être éduqué plutôt que puni, sans preuve d'efficacité.",
+    lien: "https://datan.fr/votes/legislature-17/vote_1624",
+    pos: { LFI: "C", SOC: "C", ECO: "C", GDR: "C", LIOT: "P", RE: "P", DEM: "P", HOR: "P", LR: "P", RN: "P", UDR: "P" }
+  },
+  {
+    titre: "Faut-il créer la « taxe Zucman » sur les très grandes fortunes ?",
+    date: "31 octobre 2025", theme: "Impôts", resultat: "Rejeté",
+    contexte: "Impôt minimum de 2 % par an sur les patrimoines de plus de 100 millions d'euros, soit environ 1 800 foyers, inspiré de l'économiste Gabriel Zucman.",
+    pour: "Les milliardaires paient proportionnellement moins d'impôts que le reste de la population. Les auteurs en attendent environ 15 milliards par an.",
+    contre: "Taxer aussi le patrimoine professionnel pénaliserait les entrepreneurs, et un tel impôt n'aurait de sens qu'à l'échelle internationale.",
+    lien: "https://datan.fr/votes/legislature-17/vote_3300",
+    pos: { LFI: "P", SOC: "P", ECO: "P", GDR: "P", LIOT: null, RE: "C", DEM: "C", HOR: "C", LR: "C", RN: "C", UDR: "C" }
+  },
+  {
+    titre: "Faut-il donner un statut d'autonomie à la Corse ?",
+    date: "23 juin 2026", theme: "Institutions", resultat: "Adopté (1re lecture)",
+    contexte: "Révision de la Constitution : la collectivité de Corse pourrait adapter certaines lois et fixer ses propres règles dans des domaines définis.",
+    pour: "La Corse a des spécificités insulaires fortes. Ce statut, négocié avec ses élus, doit tourner la page de décennies de tensions.",
+    contre: "Il fragilise l'unité de la République et ne répond pas aux vraies difficultés de l'île (logement, coût de la vie, violence).",
+    lien: "https://datan.fr/votes/legislature-17/vote_7454",
+    pos: { LFI: "P", SOC: "P", ECO: "P", GDR: null, LIOT: "P", RE: "P", DEM: "P", HOR: "P", LR: "C", RN: "C", UDR: "C" }
   }
 ];
 
 const app = document.getElementById("app");
+const PAR_PARTIE = 10;
 let i = 0;
 let reponses = [];
+let tirage = [];
+function melanger(a) { a = a.slice(); for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a; }
 const LIB = { P: "Pour", C: "Contre", A: "Abst.", null: "—" };
 
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
 function barre() {
-  return '<div class="progress" aria-hidden="true">' + VOTES.map((_, k) =>
+  return '<div class="progress" aria-hidden="true">' + tirage.map((_, k) =>
     '<i class="' + (k < i ? "done" : k === i ? "now" : "") + '"></i>').join("") + '</div>';
 }
 
 function question() {
-  const v = VOTES[i];
+  const v = tirage[i];
   app.innerHTML = barre() +
     '<article class="carte">' +
-      '<div class="meta"><span class="chip">Texte ' + (i + 1) + ' / ' + VOTES.length + '</span><span>' + esc(v.theme) + ' · ' + esc(v.date) + '</span></div>' +
+      '<div class="meta"><span class="chip">Texte ' + (i + 1) + ' / ' + tirage.length + '</span><span>' + esc(v.theme) + ' · ' + esc(v.date) + '</span></div>' +
       '<h2 id="q-titre" tabindex="-1">' + esc(v.titre) + '</h2>' +
       '<p class="contexte">' + esc(v.contexte) + '</p>' +
       '<div class="args"><div class="arg p"><b>Ceux qui votent pour</b>' + esc(v.pour) + '</div><div class="arg c"><b>Ceux qui votent contre</b>' + esc(v.contre) + '</div></div>' +
@@ -273,7 +366,7 @@ function question() {
 function repondre(v) {
   reponses[i] = v;
   i++;
-  if (i < VOTES.length) question(); else resultats();
+  if (i < tirage.length) question(); else resultats();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -286,7 +379,7 @@ function accord(a, b) {
 function resultats() {
   const scores = GROUPES.map(g => {
     let s = 0, n = 0;
-    VOTES.forEach((v, k) => {
+    tirage.forEach((v, k) => {
       const u = reponses[k], p = v.pos[g.id];
       if (u && p) { s += accord(u, p); n++; }
     });
@@ -309,17 +402,17 @@ function resultats() {
     (exaequo.length > 1 ? ' Plusieurs groupes sont à égalité.' : '') + '</p></div>' +
     '<h3>Ta proximité avec chaque groupe</h3>' +
     '<ol class="classement">' + scores.map(x =>
-      '<li><span class="nom">' + esc(x.g.nom) + '<small>' + esc(x.g.detail) + (x.n < VOTES.length ? ' · ' + x.n + ' textes comparés' : '') + '</small></span>' +
+      '<li><span class="nom">' + esc(x.g.nom) + '<small>' + esc(x.g.detail) + (x.n < tirage.length ? ' · ' + x.n + ' textes comparés' : '') + '</small></span>' +
       '<span class="barre"><i style="width:' + x.pct + '%"></i></span><span class="pct">' + x.pct + ' %</span></li>').join("") +
     '</ol>' +
     '<p class="note">Même vote = 1 point, une abstention face à un pour ou un contre = ½ point, votes opposés = 0. L’UDR n’existe que depuis 2024 : elle n’est comparée que sur les textes récents.</p>' +
     '<h3>Le détail, texte par texte</h3>' +
     '<div class="tableau-wrap"><table><thead><tr><th>Texte</th><th>Toi</th>' + GROUPES.map(g => '<th>' + esc(g.id) + '</th>').join("") + '</tr></thead><tbody>' +
-      VOTES.map((v, k) => '<tr><td><a href="' + v.lien + '">' + esc(v.titre) + '</a><br><small>' + esc(v.date) + ' · ' + esc(v.resultat) + '</small></td>' +
+      tirage.map((v, k) => '<tr><td><a href="' + v.lien + '">' + esc(v.titre) + '</a><br><small>' + esc(v.date) + ' · ' + esc(v.resultat) + '</small></td>' +
         '<td class="toi">' + pastille(reponses[k]) + '</td>' +
         GROUPES.map(g => '<td>' + pastille(v.pos[g.id]) + '</td>').join("") + '</tr>').join("") +
     '</tbody></table></div>' +
-    '<div class="actions"><button class="btn" type="button" id="re">Recommencer</button><a class="btn sec" href="https://datan.fr/">Explorer les votes sur Datan</a></div>';
+    '<div class="actions"><button class="btn" type="button" id="re">Rejouer avec 10 autres textes</button><a class="btn sec" href="https://datan.fr/">Explorer les votes sur Datan</a></div>';
   document.getElementById("re").addEventListener("click", recommencer);
 }
 
@@ -327,9 +420,9 @@ function pastille(v) {
   if (!v) return '<span class="v N">—</span>';
   return '<span class="v ' + v + '">' + LIB[v] + '</span>';
 }
-function recommencer() { i = 0; reponses = []; question(); window.scrollTo({ top: 0 }); }
+function recommencer() { tirage = melanger(VOTES).slice(0, PAR_PARTIE); i = 0; reponses = []; question(); window.scrollTo({ top: 0 }); }
 
-question();
+recommencer();
 </script>
 </body>
 </html>
