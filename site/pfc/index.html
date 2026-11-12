@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pierre, feuille, ciseaux</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="description" content="Pierre, feuille, ciseaux contre un ordinateur qui suit une règle secrète. Sauras-tu la trouver ?">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Plan : une table de jeu. Deux mains face à face, le score en gros chiffres, trois gros boutons,
+   l'historique en petites cartes. L'enjeu : percer la règle de l'ordinateur. Palette roche.pw. */
+:root {
+  --paper: #f2f5f3; --card: #ffffff; --ink: #18211d; --muted: #55625c;
+  --cloth: #2e6b57; --cloth-soft: #dbe9e2; --stamp: #f4b81c; --line: #c9d6cf; --perdu: #9b3b2f;
+  --display: "Bowlby One", "Arial Black", Impact, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --paper: #111815; --card: #19221e; --ink: #e5ece8; --muted: #9fb0a8;
+    --cloth: #6fbf9f; --cloth-soft: #22342c; --line: #2d3c35; --perdu: #e08a7c; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --paper: #111815; --card: #19221e; --ink: #e5ece8; --muted: #9fb0a8;
+  --cloth: #6fbf9f; --cloth-soft: #22342c; --line: #2d3c35; --perdu: #e08a7c; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 17px/1.5 var(--body); }
+a { color: var(--cloth); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--stamp); outline-offset: 2px; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 0 20px 40px; }
+.retour { display: inline-block; margin-top: 22px; font-weight: 700; font-size: .92rem; }
+header { padding: 16px 0 14px; display: grid; gap: 8px; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2rem, 7vw, 3.4rem); line-height: .95; margin: 0; }
+h1 span { color: var(--cloth); }
+.lede { margin: 0; color: var(--muted); max-width: 60ch; }
+
+.table { background: var(--card); border: 3px solid var(--ink); border-radius: 14px; padding: clamp(16px, 3vw, 26px); display: grid; gap: 18px; }
+.face { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; text-align: center; }
+.joueur small { display: block; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.main { font-size: clamp(3.4rem, 14vw, 5.5rem); line-height: 1.1; height: 1.2em; }
+.score { font-family: var(--display); font-weight: 400; font-size: clamp(2rem, 7vw, 3rem); font-variant-numeric: tabular-nums; }
+.vs { font-family: var(--display); color: var(--muted); }
+.issue { text-align: center; font-weight: 700; min-height: 1.5em; margin: 0; }
+.issue.g { color: var(--cloth); } .issue.p { color: var(--perdu); }
+.coups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.coup {
+  font: 700 1rem var(--body); padding: 14px 6px 12px; border-radius: 10px; cursor: pointer;
+  border: 3px solid var(--ink); background: var(--paper); color: var(--ink); display: grid; gap: 2px; justify-items: center;
+  box-shadow: 0 4px 0 var(--ink); transition: transform .08s ease, box-shadow .08s ease;
+}
+.coup span { font-size: 2.2rem; line-height: 1.1; }
+.coup kbd { font: .75rem var(--body); color: var(--muted); }
+.coup:hover { background: var(--cloth-soft); }
+.coup:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+@media (prefers-reduced-motion: reduce) { .coup { transition: none; } }
+.pop { animation: pop .25s ease-out; }
+@keyframes pop { from { transform: scale(.6); opacity: .2; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .pop { animation: none; } }
+
+h2 { font-family: var(--display); font-weight: 400; font-size: 1.3rem; margin: 26px 0 8px; }
+.histo { display: flex; flex-wrap: wrap; gap: 6px; }
+.histo .m { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; font-size: .9rem; display: flex; gap: 6px; align-items: center; }
+.histo .m b { font-size: .72rem; padding: 1px 6px; border-radius: 99px; }
+.histo .m b.g { background: var(--cloth); color: var(--paper); }
+.histo .m b.p { background: var(--perdu); color: var(--paper); }
+.histo .m b.e { background: var(--line); color: var(--ink); }
+.vide { color: var(--muted); font-size: .92rem; margin: 0; }
+.secret { margin-top: 22px; background: var(--card); border: 2px dashed var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 10px; }
+.secret p { margin: 0; }
+.secret[open] { border-style: solid; border-color: var(--cloth); }
+.secret summary { cursor: pointer; font-weight: 700; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+.btn { font: 700 .95rem var(--body); padding: 9px 14px; border-radius: 8px; border: 2px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer; }
+.stat { color: var(--muted); font-size: .9rem; margin: 6px 0 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="retour" href="/">← roche.pw, la boîte à outils</a>
+  <header>
+    <h1>Pierre, feuille,<br><span>ciseaux</span></h1>
+    <p class="lede">L'ordinateur ne joue pas au hasard : il suit une règle simple. Observe ses coups, trouve la règle, et tu ne perdras plus.</p>
+  </header>
+
+  <div class="table">
+    <div class="face">
+      <div class="joueur"><small>Toi</small><div class="main" id="m-toi" aria-hidden="true">❔</div><div class="score" id="s-toi">0</div></div>
+      <div class="vs">VS</div>
+      <div class="joueur"><small>Ordinateur</small><div class="main" id="m-ordi" aria-hidden="true">❔</div><div class="score" id="s-ordi">0</div></div>
+    </div>
+    <p class="issue" id="issue" role="status">À toi de jouer.</p>
+    <div class="coups" role="group" aria-label="Ton coup">
+      <button class="coup" type="button" data-c="pierre"><span aria-hidden="true">✊</span>Pierre<kbd>touche 1</kbd></button>
+      <button class="coup" type="button" data-c="feuille"><span aria-hidden="true">✋</span>Feuille<kbd>touche 2</kbd></button>
+      <button class="coup" type="button" data-c="ciseaux"><span aria-hidden="true">✌️</span>Ciseaux<kbd>touche 3</kbd></button>
+    </div>
+  </div>
+
+  <h2>Les manches</h2>
+  <div class="histo" id="histo"><p class="vide">Aucune manche jouée.</p></div>
+  <p class="stat" id="stat"></p>
+
+  <details class="secret" id="secret">
+    <summary>Révéler la règle de l'ordinateur</summary>
+    <p>À la première manche, il joue au hasard. Ensuite, il regarde le <b>coup gagnant de la manche précédente</b> (le tien si tu as gagné, le sien s'il a gagné, le coup commun en cas d'égalité) et joue <b>le coup qui le bat</b>.</p>
+    <p>Pour le battre à coup sûr : prends le coup gagnant de la manche précédente, et joue le coup qui est battu par lui. Par exemple, si pierre a gagné, il jouera feuille, donc toi tu joues ciseaux.</p>
+    <p id="prochain"></p>
+  </details>
+
+  <div class="actions"><button class="btn" type="button" id="reset">Nouvelle partie</button></div>
+</div>
+
+<script>
+const EMOJI = { pierre: "✊", feuille: "✋", ciseaux: "✌️" };
+const BAT = { pierre: "ciseaux", feuille: "pierre", ciseaux: "feuille" };      // X bat BAT[X]
+const BATTU_PAR = { pierre: "feuille", feuille: "ciseaux", ciseaux: "pierre" }; // BATTU_PAR[X] bat X
+const COUPS = ["pierre", "feuille", "ciseaux"];
+let etat = { toi: 0, ordi: 0, manches: [], gagnantPrec: null };
+
+function coupOrdi() {
+  if (!etat.gagnantPrec) return COUPS[Math.floor(Math.random() * 3)];
+  return BATTU_PAR[etat.gagnantPrec];
+}
+
+function jouer(moi) {
+  const ordi = coupOrdi();
+  let res, gagnant;
+  if (moi === ordi) { res = "e"; gagnant = moi; }
+  else if (BAT[moi] === ordi) { res = "g"; gagnant = moi; etat.toi++; }
+  else { res = "p"; gagnant = ordi; etat.ordi++; }
+  etat.gagnantPrec = gagnant;
+  etat.manches.push({ moi, ordi, res });
+  afficher(true);
+}
+
+function afficher(anim) {
+  const der = etat.manches[etat.manches.length - 1];
+  const mt = document.getElementById("m-toi"), mo = document.getElementById("m-ordi");
+  mt.textContent = der ? EMOJI[der.moi] : "❔";
+  mo.textContent = der ? EMOJI[der.ordi] : "❔";
+  if (anim) { [mt, mo].forEach(e => { e.classList.remove("pop"); void e.offsetWidth; e.classList.add("pop"); }); }
+  document.getElementById("s-toi").textContent = etat.toi;
+  document.getElementById("s-ordi").textContent = etat.ordi;
+  const issue = document.getElementById("issue");
+  issue.className = "issue" + (der ? " " + der.res : "");
+  issue.textContent = !der ? "À toi de jouer." :
+    der.res === "g" ? "Gagné ! " + cap(der.moi) + " bat " + der.ordi + "." :
+    der.res === "p" ? "Perdu. " + cap(der.ordi) + " bat " + der.moi + "." :
+    "Égalité : " + der.moi + " contre " + der.ordi + ".";
+  const h = document.getElementById("histo");
+  h.innerHTML = etat.manches.length ? etat.manches.map((m, i) =>
+    '<span class="m" title="Manche ' + (i + 1) + '">' + EMOJI[m.moi] + ' / ' + EMOJI[m.ordi] +
+    '<b class="' + m.res + '">' + (m.res === "g" ? "gagné" : m.res === "p" ? "perdu" : "égal") + '</b></span>').join("")
+    : '<p class="vide">Aucune manche jouée.</p>';
+  // série de victoires en cours, pour savoir si la règle est trouvée
+  let serie = 0;
+  for (let k = etat.manches.length - 1; k >= 0 && etat.manches[k].res === "g"; k--) serie++;
+  document.getElementById("stat").textContent = etat.manches.length
+    ? etat.manches.length + " manche" + (etat.manches.length > 1 ? "s" : "") + " jouée" + (etat.manches.length > 1 ? "s" : "") +
+      (serie >= 5 ? " · " + serie + " victoires d'affilée : tu as trouvé la règle !" : serie >= 2 ? " · " + serie + " victoires d'affilée" : "")
+    : "";
+  document.getElementById("prochain").textContent = etat.gagnantPrec
+    ? "Là, " + etat.gagnantPrec + " a gagné la dernière manche : l'ordinateur va jouer " + BATTU_PAR[etat.gagnantPrec] + ", donc joue " + BAT[etat.gagnantPrec] + "."
+    : "Pour l'instant aucune manche jouée : son premier coup sera tiré au hasard.";
+}
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+document.querySelectorAll(".coup").forEach(b => b.addEventListener("click", () => jouer(b.dataset.c)));
+document.addEventListener("keydown", e => {
+  if (e.target.closest && e.target.closest("summary")) return;
+  const c = { "1": "pierre", "2": "feuille", "3": "ciseaux" }[e.key];
+  if (c) jouer(c);
+});
+document.getElementById("reset").addEventListener("click", () => { etat = { toi: 0, ordi: 0, manches: [], gagnantPrec: null }; afficher(false); });
+afficher(false);
+</script>
+</body>
+</html>
